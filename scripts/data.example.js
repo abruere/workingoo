@@ -330,7 +330,7 @@ module.exports = {
               },
               reversed: {
                 assetTypesIds: ['assetTypes::applicant'],
-                isActiveFor: ['getters.isPremium'],
+                isActiveFor: ['provider'],
                 isDefaultFor: ['getters.isPremium']
               }
             }
@@ -1349,6 +1349,9 @@ module.exports = {
                 computed.isUser
                   ? (user.roles.includes("applicant") ? [] : ["applicant"])
                   : (user.roles.includes("recruiter") ? [] : ["recruiter"])
+                      .concat(
+                        user.roles.includes("newcomer") ? [] : ["newcomer"]
+                      )
               )
             `
           }
@@ -1441,7 +1444,17 @@ module.exports = {
           endpointMethod: 'POST',
           stop: '!user.roles.includes("provider") || user.roles.includes("organization")',
           computed: {
-            rolesToUpdate: 'user.roles.includes("recruiter") ? user.roles : user.roles.concat(["recruiter"])',
+            rolesToUpdate: `
+              (
+                user.roles.includes("recruiter")
+                  ? user.roles
+                  : user.roles.concat(["recruiter"])
+              ).concat(
+                user.roles.includes("newcomer")
+                  ? []
+                  : ["newcomer"]
+              )
+            `,
           },
           endpointUri: '/users',
           endpointPayload: {
@@ -1530,9 +1543,11 @@ module.exports = {
       computed: {
         parentOrgId: 'user.id',
         mayBeParentOrg: 'Object.keys(user.organizations).length === 0',
+        nbTotalFreeReceivedApplications: '_.get(user, "platformData.instant.nbTotalFreeReceivedApplications", 0)',
         contactId: '_.get(user, "metadata.instant.contactId")',
         premiumEndDate: '_.get(user, "metadata._private.premiumEndDate")',
         changedPremiumEndDate: '_.get(changesRequested, "metadata._private.premiumEndDate")',
+        changedReceivedApplications: '_.get(changesRequested, "platformData.instant.nbTotalFreeReceivedApplications")',
       },
       run: [
         // get user to retrieve all children organizations
@@ -1540,8 +1555,9 @@ module.exports = {
           name: 'user',
           computed: {
             dataChanged: `
-              typeof changesRequested.roles !== "undefined" ||
-              typeof computed.changedPremiumEndDate !== "undefined"
+              typeof changesRequested.changedRoles !== "undefined" ||
+              typeof computed.changedPremiumEndDate !== "undefined" ||
+              typeof computed.changedReceivedApplications !== "undefined"
             `
           },
           stop: `
@@ -1556,6 +1572,7 @@ module.exports = {
         },
         // synchronize all children organizations with parent org data
         {
+          stop: '!computed.objects.length',
           computed: {
             objects: `
               Object.keys(_.get(responses, "user.organizations", {}))
@@ -1568,6 +1585,11 @@ module.exports = {
                       metadata: {
                         _private: {
                           premiumEndDate: computed.premiumEndDate
+                        }
+                      },
+                      platformData: {
+                        instant: {
+                          nbTotalFreeReceivedApplications: computed.nbTotalFreeReceivedApplications
                         }
                       }
                     }
@@ -1878,6 +1900,176 @@ module.exports = {
       ]
     },
 
+    createTransactionCancellationTask: {
+      name: '[Init] Transaction cancellation task',
+      description: 'Create a task that will cancel a transaction if there is no status change',
+      event: 'transaction__created',
+      computed: {
+        executionDate: 'new Date(new Date().getTime() + 15 * 24 * 3600 * 1000).toISOString()' // 15 days
+      },
+      run: [
+        {
+          endpointMethod: 'POST',
+          stop: `transaction.status !== "draft"`,
+          endpointUri: '/tasks',
+          endpointPayload: {
+            executionDate: 'computed.executionDate',
+            eventType: '"transaction_to_cancel"',
+            eventObjectId: 'transaction.id'
+          }
+        }
+      ]
+    },
+
+    cancelTransactions: {
+      name: 'Cancel draft transactions',
+      description: `
+        This is triggered by the transaction cancellation task
+        Remove the task after cancelling the transaction
+      `,
+      event: 'transaction_to_cancel',
+      run: [
+        {
+          name: 'tasks',
+          endpointMethod: 'POST',
+          stop: `transaction.status !== "draft"`,
+          endpointUri: '/transactions/${transaction.id}/transitions',
+          endpointPayload: {
+            name: '"cancel"',
+            data: {
+              cancellationReason: '"refusedByOwner"'
+            }
+          }
+        },
+        {
+          endpointMethod: 'GET',
+          endpointUri: '/tasks?eventType=transaction_to_cancel&eventObjectId=${transaction.id}',
+        },
+        {
+          computed: {
+            task: 'responses.tasks.results[0]'
+          },
+          stop: `!computed.task`,
+          endpointMethod: 'DELETE',
+          endpointUri: '/tasks/${computed.task.id}'
+        }
+      ]
+    },
+
+    createSendTransactionsSummaryTask: {
+      name: '[Init] Transactions summary task to provider user',
+      description: 'Create a task that will send an email with transactions summary from the past day',
+      event: 'user__created',
+      computed: {
+        isProvider: 'user.roles.some(role => role === "provider")',
+        isOrganization: 'user.roles.some(role => role === "organization")',
+      },
+      run: [
+        {
+          endpointMethod: 'POST',
+          stop: `!computed.isProvider || !computed.isOrganization`,
+          endpointUri: '/tasks',
+          endpointPayload: {
+            recurringPattern: '"0 8 * * *"',
+            eventType: '"send_email_transactions_summary"',
+            eventObjectId: 'user.id'
+          }
+        }
+      ]
+    },
+
+    removeSendTransactionsSummaryTask: {
+      name: '[Delete] Transactions summary task to provider user',
+      description: 'Remove a task that will send an email with transactions summary from the past day',
+      event: 'user__deleted',
+      computed: {
+        isUserProvider: 'user.roles.some(role => role === "provider")'
+      },
+      run: [
+        {
+          name: 'tasks',
+          stop: `!computed.isProvider`,
+          endpointMethod: 'GET',
+          endpointUri: '/tasks?eventType=send_email_transactions_summary&eventObjectId=${user.id}',
+        },
+        {
+          computed: {
+            task: 'responses.tasks.results[0]'
+          },
+          stop: `!computed.task`,
+          endpointMethod: 'DELETE',
+          endpointUri: '/tasks/${computed.task.id}'
+        }
+      ]
+    },
+
+    sendNewMessagesEmail: {
+      name: '[Email] Transaction summary to provider',
+      description: `
+        Send an email to the provider with all messages metrics from the past date
+      `,
+      context: ['stelace'],
+      event: 'send_email_transactions_summary',
+      computed: {
+        toName: 'user.displayName',
+        toEmail: 'user.email',
+        dateLimit: 'new Date(new Date().getTime() - 24 * 3600 * 1000).toISOString()',
+      },
+      run: [
+        {
+          name: 'messages',
+          stop: '!computed.toEmail',
+          endpointMethod: 'GET',
+          endpointUri: '/messages?createdDate[gte]=${encodeURIComponent(computed.dateLimit)}&receiverId=${user.id}&nbResultsPerPage=100'
+        },
+        {
+          name: 'assets',
+          computed: {
+            nbMessagesByAssetId: `
+              _.get(responses, "messages.results", [])
+                .filter(message => {
+                  return _.get(message, "metadata.instant.firstNotification") &&
+                    _.get(message, "metadata.instant.assetId")
+                })
+                .reduce((nbMessagesByAssetId, message) => {
+                  const assetId = _.get(message, "metadata.instant.assetId")
+                  nbMessagesByAssetId[assetId] = (nbMessagesByAssetId[assetId] || 0) + 1
+                  return nbMessagesByAssetId
+                }, {})
+            `
+          },
+          endpointMethod: 'GET',
+          stop: `!Object.keys(computed.nbMessagesByAssetId).length`,
+          endpointUri: '/assets?id=${Object.keys(computed.nbMessagesByAssetId).join(",")}'
+        },
+        {
+          endpointMethod: 'POST',
+          computed: {
+            assets: 'responses.assets.results',
+          },
+          endpointUri: '/emails/send-template',
+          endpointPayload: {
+            name: '"transactionsSummaryToOwner"',
+            data: {
+              transactionsSummary: `
+                computed.assets.map(asset => {
+                  const nbMessages = computed.nbMessagesByAssetId[asset.id]
+
+                  return nbMessages + " candidature" + (nbMessages > 1 ? "s" : "") +
+                    " reçue" + (nbMessages > 1 ? "s" : "") +
+                    " pour le poste de " + asset.name + "<br><br>"
+                }).join("")
+              `,
+              inboxUrl: '`${env.STELACE_INSTANT_WEBSITE_URL}/i`',
+            },
+            locale: '"fr"',
+            toEmail: 'computed.toEmail',
+            toName: 'computed.toName'
+          }
+        }
+      ]
+    },
+
     completeTransactions: {
       name: 'Complete transactions',
       description: `
@@ -1932,7 +2124,90 @@ module.exports = {
           }
         }
       ]
-    }
+    },
+
+    updateFreeReceivedApplications: {
+      name: '[Update] Free received applications',
+      event: 'message__created',
+      computed: {
+        transactionId: 'message.topicId',
+        isHiddenMessage: '_.get(message, "metadata.isHiddenMessage", false)',
+      },
+      run: [
+        {
+          name: 'receiver',
+          description: 'Only trigger the workflow if the message is associated to a transaction and is not hidden',
+          stop: `
+            !message.receiverId ||
+            computed.isHiddenMessage ||
+            !message.conversationId ||
+            !computed.transactionId
+          `,
+          endpointMethod: 'GET',
+          endpointUri: '/users/${message.receiverId}',
+        },
+        {
+          description: `
+            Add the free received application only if it isn't already in the list
+            and update the nb total free received applications if the receiver is the root organization
+          `,
+          computed: {
+            receiverRoles: 'responses.receiver.roles',
+            parentOrgId: 'Object.keys(responses.receiver.organizations)[0]',
+            freeReceivedApplications: '_.get(responses, "receiver.platformData.instant.freeReceivedApplications") || []',
+            newNbTotalFreeReceivedApplications: '_.get(responses, "receiver.platformData.instant.nbTotalFreeReceivedApplications", 0) + 1',
+          },
+          stop: `
+            !computed.receiverRoles.includes("provider") ||
+            !computed.receiverRoles.includes("organization") ||
+            !computed.receiverRoles.includes("newcomer") ||
+            computed.freeReceivedApplications.find(application => application.conversationId === message.conversationId)
+          `,
+          endpointMethod: 'PATCH',
+          endpointUri: '/users/${message.receiverId}',
+          endpointPayload: {
+            roles: `
+              computed.newNbTotalFreeReceivedApplications <= 9
+                ? computed.receiverRoles.concat(computed.receiverRoles.includes("newcomer") ? [] : ["newcomer"])
+                : computed.receiverRoles.filter(role => role !== "newcomer")
+            `,
+            platformData: {
+              instant: {
+                freeReceivedApplications: `
+                  computed.freeReceivedApplications.concat({
+                    transactionId: computed.transactionId,
+                    conversationId: message.conversationId
+                  })
+                `,
+                nbTotalFreeReceivedApplications: `
+                  !computed.parentOrgId
+                    ? computed.newNbTotalFreeReceivedApplications
+                    : undefined
+                `
+              }
+            }
+          }
+        },
+        {
+          description: 'The receiver is not the parent organization, so another step is needed to update it',
+          stop: '!computed.parentOrgId',
+          endpointMethod: 'PATCH',
+          endpointUri: '/users/${computed.parentOrgId}',
+          endpointPayload: {
+            roles: `
+              computed.newNbTotalFreeReceivedApplications <= 9
+                ? computed.receiverRoles.concat(computed.receiverRoles.includes("newcomer") ? [] : ["newcomer"])
+                : computed.receiverRoles.filter(role => role !== "newcomer")
+            `,
+            platformData: {
+              instant: {
+                nbTotalFreeReceivedApplications: 'computed.newNbTotalFreeReceivedApplications'
+              }
+            }
+          }
+        }
+      ]
+    },
   }
   /* eslint-enable no-template-curly-in-string */
 }

@@ -82,7 +82,7 @@ export function canPerformReverseSearch (state, getters, rootState, rootGetters)
 }
 
 export function canViewUserProfileDetails (state, getters, rootState, rootGetters) {
-  return rootGetters.isProvider && (rootGetters.isPremium || rootGetters.isNewcomer)
+  return rootGetters.isProvider && rootGetters.isPremium
 }
 
 export function canViewContactUserCta (state, getters, rootState, rootGetters) {

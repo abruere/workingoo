@@ -78,6 +78,20 @@ user:
       en: Premium
       fr: Premium
       context: Some users can subscribe to get premium features.
+    premium_hidden_information:
+      en: |
+        Some information on the current page are hidden because you didn’t subscribe to {SERVICE_NAME}.
+        Subscribe now to view the whole page.
+      fr: |
+        Certaines informations sur cette page sont masquées car vous n’êtes pas abonnés à {SERVICE_NAME}.
+        Abonnez-vous dès maintenant pour voir l’intégralité de la page.
+    premium_forbidden_access:
+      en: |
+        You can’t access this page because you didn't subscribe to {SERVICE_NAME}.
+        Subscribe now to access it.
+      fr: |
+        Vous ne pouvez pas consulter cette page car vous n'êtes pas abonnés à {SERVICE_NAME}.
+        Abonnez-vous dès maintenant pour pouvoir y accéder.
     validation_header: &accountValidationHeader
       en: Account validation
       fr: Vérification du profil
@@ -88,6 +102,12 @@ user:
     checkout_prerequisite_message: *accountValidationRequiredMessage
     contact_user_prerequisite_header: *accountValidationHeader
     contact_user_prerequisite_message: *accountValidationRequiredMessage
+    reverse_search_prerequisite_header:
+      en: Perform a reversed search
+      fr: Effectuer une recherche inversée
+    reverse_search_prerequisite_message:
+      en: A subscription is required to perform a reversed search.
+      fr: Un abonnement est requis pour effectuer une recherche inversée.
     contact_info_header:
       en: My contact info
       fr: Mes coordonnées

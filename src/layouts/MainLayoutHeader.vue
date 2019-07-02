@@ -264,7 +264,7 @@ export default {
         flat
         @click="toggleMenu"
       >
-        <AppMiniLogo class="company-mini-logo current-color xs" />
+        <AppMiniLogo class="company-mini-logo xs" />
       </QBtn>
 
       <div

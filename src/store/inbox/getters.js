@@ -20,6 +20,7 @@ export function conversations (state, getters, rootState, rootGetters) {
   const {
     currentUser,
     ratingsOptions,
+    isPremium,
     isUser,
     isProvider,
   } = rootGetters
@@ -98,6 +99,8 @@ export function conversations (state, getters, rootState, rootGetters) {
     const ratingsPrompt = transactionId ? getRatingsPrompt({ isProvider, transaction }) : false
     const ratingsReadonly = !!ratedTransactionsById[transactionId]
 
+    const canAccess = canAccessConversation({ isProvider, isPremium, currentUser, conversationId })
+
     const conversation = {
       id: conversationId,
       asset: transactionId ? get(transaction, 'assetSnapshot', {}) : asset,
@@ -111,7 +114,8 @@ export function conversations (state, getters, rootState, rootGetters) {
       messages: exposedConversationMessages,
       lastInterlocutorMessage,
       lastOwnMessage,
-      isEmpty: isEmptyConversation
+      isEmpty: isEmptyConversation,
+      canAccess,
     }
 
     conversations.push(conversation)
@@ -160,4 +164,13 @@ function getRatingsPrompt ({ isProvider, transaction }) {
   if (!isProvider) return false
 
   return ['validated', 'completed'].includes(transaction.status)
+}
+
+function canAccessConversation ({ isProvider, isPremium, currentUser, conversationId }) {
+  if (!isProvider || isPremium) return true
+
+  const freeReceivedApplications = get(currentUser, 'platformData.instant.freeReceivedApplications') || []
+  return !!freeReceivedApplications.find(data => {
+    return data.conversationId === conversationId
+  })
 }

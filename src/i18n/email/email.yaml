@@ -2,14 +2,14 @@
 common:
   preheader_content: &preheader
     fr: >-
-      Ajoutez <a href="mailto:contact@example.com">contact@example.com</a>
+      Ajoutez <a href="mailto:contact@workingoo.com">contact@workingoo.com</a>
       à votre carnet d’adresses pour être sûr de recevoir nos emails.
   footer_content: &footer_text
     fr: >-
-      Une question ? Écrivez-nous à l’adresse <a href="mailto:contact@example.com">contact@example.com</a>
+      Une question ? Écrivez-nous à l’adresse <a href="mailto:contact@workingoo.com">contact@workingoo.com</a>
       et nous vous répondrons dès que possible.
   legal_notice: &legal
-    fr: Tous droits réservés © 2019 {serviceName}
+    fr: Tous droits réservés © 2019 Workingoo SAS - 940 Bachat Bouloud - 38410 Chamrousse
   style__color_brand: &brand_color
     fr: "#ED7F12"
   style__color_calltoaction: &cta_color
@@ -72,6 +72,21 @@ passwordReset:
     fr: Réinitialiser mon mot de passe
   trailing_content:
     fr: A très vite sur {serviceName} !
+
+transactionsSummaryToOwner:
+  subject:
+    fr: Nouvelles candidatures en attente
+  content:
+    fr: >-
+      Bonjour,<br><br>
+
+      Vous avez reçu de nouvelles candidatures à vos offres d'emploi. N'hésitez pas à les consulter et à répondre aux candidats.<br><br>
+
+      {transactionsSummary}
+
+      Pour accéder à l'intégralité des candidatures, rendez-vous dans <a href="{inboxUrl}">votre messagerie</a> sur {serviceName}.<br><br>
+
+      A très vite sur {serviceName} !
 
 transactionAcceptedByOwnerToTaker:
   subject:

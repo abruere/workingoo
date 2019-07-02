@@ -1,9 +1,9 @@
 {
-  "name": "jobs-marketplace-template-vue",
+  "name": "Workingoo",
   "version": "0.1.0",
   "description": "Marketplace powered by Stelace API and Vue.js",
-  "productName": "Stellar Jobs",
-  "homepage": "https://stelace.com",
+  "productName": "Workingoo",
+  "homepage": "https://www.workingoo.com",
   "author": "Stelace (https://stelace.com)",
   "license": "MIT",
   "private": true,

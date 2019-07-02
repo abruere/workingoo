@@ -79,6 +79,7 @@ module.exports = function (ctx) {
   })
 
   const primaryColor = defaultStyles.primaryColor || '#1055b6'
+  const secondaryColor = defaultStyles.secondaryColor || '#ed7f12'
   const loadingScreen = {
     title: injectServiceName(_.get(localTranslations.pages, 'home.header', '')),
     notice: injectServiceName(_.get(localTranslations.status, 'loading', '')),
@@ -243,11 +244,15 @@ module.exports = function (ctx) {
 
       googleFonts,
 
+      fbPixelId: process.env.FB_PIXEL_ID,
+      hotjarId: process.env.HOTJAR_ID,
+
       serviceName: process.env.VUE_APP_SERVICE_NAME,
       ogDesc: seo.ogDesc,
       ogImage: seo.ogImage,
       websiteUrl: seo.websiteUrl,
       primaryColor,
+      secondaryColor,
 
       loadingTitle: loadingScreen.title || 'Welcome on our website',
       loadingNotice: loadingScreen.notice || 'Loading',

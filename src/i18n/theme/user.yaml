@@ -33,3 +33,7 @@ user:
     org_name_with_number_suffix:
       en: " - Facility #{number}"
       fr: " - Établissement n°{number}"
+    reverse_search_prerequisite_header:
+      fr: Rechercher des candidats
+    reverse_search_prerequisite_message:
+      fr: Pour consulter les profils des candidats correspondant à vos critères de recherche personnalisés, abonnez-vous et devenez recruteur Premium.

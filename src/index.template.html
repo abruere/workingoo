@@ -14,7 +14,8 @@
     <meta name="apple-mobile-web-app-title" content="<%= htmlWebpackPlugin.options.serviceName %>">
     <meta name="application-name" content="<%= htmlWebpackPlugin.options.serviceName %>">
     <meta name="theme-color" content="<%= htmlWebpackPlugin.options.primaryColor %>">
-    <meta name="msapplication-TileColor" content="#b91d47">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="msapplication-config" content="/browserconfig.xml">
 
     <!-- Open Graph -->
     <meta property="og:title" content="<%= htmlWebpackPlugin.options.serviceName %>">
@@ -22,10 +23,11 @@
     <meta property="og:url" content="<%= htmlWebpackPlugin.options.websiteUrl %>">
     <meta property="og:image" content="<%= htmlWebpackPlugin.options.ogImage %>">
 
-    <link rel="apple-touch-icon" sizes="180x180" href="statics/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="statics/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="statics/favicon-16x16.png">
-    <link rel="mask-icon" href="statics/safari-pinned-tab.svg" color="<%= htmlWebpackPlugin.options.primaryColor %>">
+    <link rel="apple-touch-icon" sizes="180x180" href="statics/apple-touch-icon.png?v=Gvm5WNkn5j">
+    <link rel="icon" type="image/png" sizes="32x32" href="statics/favicon-32x32.png?v=Gvm5WNkn5j">
+    <link rel="icon" type="image/png" sizes="16x16" href="statics/favicon-16x16.png?v=Gvm5WNkn5j">
+    <link rel="mask-icon" href="statics/safari-pinned-tab.svg?v=Gvm5WNkn5j" color="<%= htmlWebpackPlugin.options.secondaryColor %>">
+    <link rel="icon" href="/favicon.ico?v=Gvm5WNkn5j">
 
     <link rel="preconnect" href="<%= htmlWebpackPlugin.options.apiBaseUrl %>" crossorigin>
     <% if (htmlWebpackPlugin.options.googleFonts.length) { %>
@@ -165,5 +167,37 @@
     <!-- DO NOT touch the following DIV -->
     <div id="q-app"></div>
 
+    <% if (htmlWebpackPlugin.options.fbPixelId) { %>
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window,document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '<%= htmlWebpackPlugin.options.fbPixelId %>');
+      fbq('track', 'PageView');
+    </script>
+    <noscript>
+      <img height="1" width="1"
+      src="https://www.facebook.com/tr?id=<%= htmlWebpackPlugin.options.fbPixelId %>&ev=PageView
+      &noscript=1"/>
+    </noscript>
+    <% } %>
+
+    <% if (htmlWebpackPlugin.options.hotjarId) { %>
+    <script>
+      (function(h,o,t,j,a,r){
+        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+        h._hjSettings={hjid:<%= htmlWebpackPlugin.options.hotjarId %>,hjsv:6};
+        a=o.getElementsByTagName('head')[0];
+        r=o.createElement('script');r.async=1;
+        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+        a.appendChild(r);
+      })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+    </script>
+    <% } %>
   </body>
 </html>

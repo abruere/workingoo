@@ -3,6 +3,8 @@ import { mapState, mapGetters } from 'vuex'
 import { date } from 'quasar'
 import { get, values } from 'lodash'
 
+import * as mutationTypes from 'src/store/mutation-types'
+
 import { isUser } from 'src/utils/user'
 
 import EventBus from 'src/utils/event-bus'
@@ -136,8 +138,12 @@ export default {
       if (!this.conversation) {
         // display an error
       } else {
-        await this.$store.dispatch('fetchConversationInfo', { conversationId: this.conversationId })
-        await this.$store.dispatch('markConversationAsRead', { conversationId: this.conversationId })
+        if (!this.conversation.canAccess) {
+          this.openSubscriptionCtaDialog()
+        } else {
+          await this.$store.dispatch('fetchConversationInfo', { conversationId: this.conversationId })
+          await this.$store.dispatch('markConversationAsRead', { conversationId: this.conversationId })
+        }
       }
     },
     getTimestamp (date) {
@@ -206,6 +212,7 @@ export default {
             instant: {
               senderType,
               firstNotification,
+              assetId: this.inbox.asset.id,
             }
           }
         })
@@ -219,6 +226,37 @@ export default {
     onSaveRatings () {
       // refresh the rating scores
       this.$store.dispatch('fetchMessages', { forceRefreshAll: true })
+    },
+    openSubscriptionCtaDialog () {
+      this.$store.commit({
+        type: mutationTypes.LAYOUT__SET_PAGE_BLURRED,
+        blurred: true
+      })
+
+      const stopBlur = () => {
+        this.$store.commit({
+          type: mutationTypes.LAYOUT__SET_PAGE_BLURRED,
+          blurred: false
+        })
+      }
+
+      const onClose = () => {
+        stopBlur()
+        this.goToPreviousPage()
+      }
+
+      this.$q.dialog({
+        message: this.$t(
+          { id: 'user.account.premium_forbidden_access' },
+        ),
+        ok: {
+          label: this.$t({ id: 'prompt.continue_button' }),
+          color: 'positive',
+          class: 'q-ma-sm'
+        }
+      })
+        .onOk(() => onClose())
+        .onDismiss(() => onClose())
     },
   },
 }

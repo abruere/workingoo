@@ -156,6 +156,28 @@ export default {
 
         return false
       })
+    },
+    viewConversation (conversation) {
+      if (conversation.canAccess) {
+        this.$router.push({ name: 'conversation', params: { id: conversation.id } })
+      } else {
+        this.openSubscriptionCtaDialog()
+      }
+    },
+    viewProfile (userId) {
+      this.$router.push({ name: 'publicProfile', params: { id: userId } })
+    },
+    openSubscriptionCtaDialog () {
+      this.$q.dialog({
+        message: this.$t(
+          { id: 'user.account.premium_forbidden_access' },
+        ),
+        ok: {
+          label: this.$t({ id: 'prompt.continue_button' }),
+          color: 'positive',
+          class: 'q-ma-sm'
+        }
+      })
     }
   }
 }
@@ -243,12 +265,12 @@ export default {
           </template>
 
           <template v-slot:item="props">
-            <router-link
-              :to="{ name: 'conversation', params: { id: props.row.id } }"
+            <div
               :class="[
-                'conversation anchor-text--reset col-12',
+                'conversation anchor-text--reset col-12 cursor-pointer',
                 props.row.read ? '' : 'unread'
               ]"
+              @click="viewConversation(props.row)"
             >
               <!-- Useless to set archives to lower opacity when shown alone -->
               <QItem
@@ -261,6 +283,7 @@ export default {
                 <QItemSection
                   class="interlocutor-avatar"
                   avatar
+                  @click.stop.prevent="viewProfile(props.row.interlocutor.id)"
                 >
                   <AppAvatar :user="props.row.interlocutor" />
                 </QItemSection>
@@ -268,6 +291,7 @@ export default {
                 <QItemSection
                   top
                   class="col-2 gt-xs"
+                  @click.stop.prevent="viewProfile(props.row.interlocutor.id)"
                 >
                   <QItemLabel class="interlocutor-name q-mt-sm">
                     {{ props.row.interlocutor.displayName }}
@@ -317,6 +341,7 @@ export default {
                       @click.stop.prevent
                     >
                       <TransactionActions
+                        v-if="props.row.canAccess"
                         :transaction="props.row.transaction"
                         :actions="props.row.transactionActions"
                         :prompt-ratings="props.row.ratingsPrompt"
@@ -339,6 +364,7 @@ export default {
 
                 <QItemSection side>
                   <div
+                    v-if="props.row.canAccess"
                     class="text-grey-8 q-gutter-xs"
                     @click.stop.prevent
                   >
@@ -408,7 +434,7 @@ export default {
                   </div>
                 </QItemSection>
               </QItem>
-            </router-link>
+            </div>
           </template>
         </QTable>
       </div>

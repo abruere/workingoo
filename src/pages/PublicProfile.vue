@@ -97,6 +97,7 @@ export default {
       'suggestionSearchMode',
       'canViewRatingsList',
       'canViewRatingsListCta',
+      'canViewUserProfileDetails'
     ]),
     ...mapState([
       'asset',
@@ -165,6 +166,9 @@ export default {
       }
       if (this.showRatingsList) {
         this.fetchUserRatingsStatsByTransaction({ userId: this.selectedUser.id })
+      }
+      if (this.isUser && this.isCurrentUserProvider && !this.canViewUserProfileDetails) {
+        this.openSubscriptionCtaDialog()
       }
     },
     async fetchUserAssets () {
@@ -269,7 +273,33 @@ export default {
     },
     updateExperiences (experiences) {
       return this.updateUser('experiences', experiences)
-    }
+    },
+    openSubscriptionCtaDialog () {
+      this.$store.commit({
+        type: mutationTypes.LAYOUT__SET_PAGE_BLURRED,
+        blurred: true
+      })
+
+      const stopBlur = () => {
+        this.$store.commit({
+          type: mutationTypes.LAYOUT__SET_PAGE_BLURRED,
+          blurred: false
+        })
+      }
+
+      this.$q.dialog({
+        message: this.$t(
+          { id: 'user.account.premium_hidden_information' },
+        ),
+        ok: {
+          label: this.$t({ id: 'prompt.continue_button' }),
+          color: 'positive',
+          class: 'q-ma-sm'
+        }
+      })
+        .onOk(() => stopBlur())
+        .onDismiss(() => stopBlur())
+    },
   }
 }
 </script>

@@ -64,7 +64,9 @@
   command = "sed -i 's/noindex, nofollow/all/g' netlify.toml && yarn build"
 
   [context.production.environment]
-    VUE_APP_SERVICE_NAME = "Stellar Jobs"
+    VUE_APP_SERVICE_NAME = "Workingoo"
+    VUE_APP_DEFAULT_LANGUAGE = "fr"
+    VUE_APP_DEFAULT_CURRENCY = "EUR"
     VUE_APP_NOMINATIM_HOST = "https://open.mapquestapi.com"
 
     # Filling these in Netlify UI rather than here
@@ -87,7 +89,7 @@
 [context.dev]
   # command = "yarn build"
   [context.dev.environment]
-    VUE_APP_SERVICE_NAME = "Stellar Jobs"
+    VUE_APP_SERVICE_NAME = "Workingoo"
     VUE_APP_NOMINATIM_HOST = "https://open.mapquestapi.com"
     VUE_APP_GOOGLE_ANALYTICS_ID = "UA-XXXXXXXX-1"
     VUE_APP_CDN_UPLOAD_PREFIX = "dev/cd"
@@ -97,7 +99,9 @@
 [context.deploy-preview]
   # command = "yarn build"
   [context.deploy-preview.environment]
-    VUE_APP_SERVICE_NAME = "Stellar Jobs"
+    VUE_APP_SERVICE_NAME = "Workingoo"
+    VUE_APP_DEFAULT_LANGUAGE = "fr"
+    VUE_APP_DEFAULT_CURRENCY = "EUR"
     VUE_APP_NOMINATIM_HOST = "https://open.mapquestapi.com"
     VUE_APP_GOOGLE_ANALYTICS_ID = "UA-XXXXXXXX-1"
     VUE_APP_CDN_UPLOAD_PREFIX = "dev/cd"

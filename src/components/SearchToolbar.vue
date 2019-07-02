@@ -7,17 +7,20 @@ import { date } from 'quasar'
 import AppSVGActionButton from 'src/components/AppSVGActionButton'
 import CustomAttributesEditor from 'src/components/CustomAttributesEditor'
 import DateRangePicker from 'src/components/DateRangePicker'
+import SubscriptionDialog from 'src/components/SubscriptionDialog'
 
 export default {
   components: {
     AppSVGActionButton,
     CustomAttributesEditor,
     DateRangePicker,
+    SubscriptionDialog,
   },
   data () {
     return {
       debounceSearchAssets: debounce(this.searchAssets, 500),
       selectedCustomAttributes: {},
+      subscriptionModalOpened: false,
     }
   },
   computed: {
@@ -65,6 +68,9 @@ export default {
       if (!this.search.endDate) return
       return this.$t({ id: 'time.date_short' }, { date: new Date(this.search.endDate) })
     },
+    showPremiumCtaIfReversedMode () {
+      return this.isProvider && !this.isPremium
+    },
     ...mapState([
       'layout',
       'route',
@@ -73,6 +79,8 @@ export default {
       'common',
     ]),
     ...mapGetters([
+      'isProvider',
+      'isPremium',
       'isSearchMapVisible',
       'searchOptions',
       'searchModes'
@@ -130,6 +138,11 @@ export default {
     selectSearchMode (searchMode) {
       if (searchMode === this.search.searchMode) return
 
+      if (searchMode === 'reversed' && this.showPremiumCtaIfReversedMode) {
+        this.subscriptionModalOpened = true
+        return
+      }
+
       this.$store.dispatch('selectSearchMode', { searchMode })
       this.searchAssets()
     },
@@ -163,6 +176,10 @@ export default {
       } else {
         this.$router.push({ name: 'search' })
       }
+    },
+    redirectToPlans () {
+      this.subscriptionModalOpened = false
+      this.$router.push({ name: 'home', hash: '#pricing' })
     }
   }
 }
@@ -176,33 +193,66 @@ export default {
     <QBtnDropdown
       v-if="searchModes.length > 1"
       class="q-ml-xs"
-      :label="selectedSearchModeLabel"
       :rounded="style.roundedTheme"
       color="transparent"
       text-color="primary"
-      icon="search"
       unelevated
       no-caps
       dense
     >
-      <QList>
-        <QItem
-          v-for="mode in searchModes"
-          :key="mode"
-          v-close-popup
-          clickable
-          @click="selectSearchMode(mode)"
-        >
-          <QItemSection>
-            <QItemLabel>
+      <template v-slot:label>
+        <QIcon name="search" />
+        <AppContent
+          v-if="search.searchMode"
+          class="q-ml-sm"
+          entry="form"
+          :field="`search.modes.${search.searchMode}`"
+        />
+        <AppContent
+          v-if="search.searchMode === 'reversed' && showPremiumCtaIfReversedMode"
+          class="text-uppercase non-selectable q-ml-sm"
+          tag="QChip"
+          entry="user"
+          field="account.premium_label"
+          square
+          color="warning"
+          text-color="white"
+        />
+      </template>
+
+      <template>
+        <QList>
+          <QItem
+            v-for="mode in searchModes"
+            :key="mode"
+            v-close-popup
+            clickable
+            @click="selectSearchMode(mode)"
+          >
+            <QItemSection>
+              <QItemLabel>
+                <AppContent
+                  :class="[mode === 'reversed' && showPremiumCtaIfReversedMode ? 'text-weight-bold' : '']"
+                  entry="form"
+                  :field="`search.modes.${mode}`"
+                />
+              </QItemLabel>
+            </QItemSection>
+            <QItemSection>
               <AppContent
-                entry="form"
-                :field="`search.modes.${mode}`"
+                v-if="mode === 'reversed' && showPremiumCtaIfReversedMode"
+                class="text-uppercase non-selectable q-mr-md"
+                tag="QChip"
+                entry="user"
+                field="account.premium_label"
+                square
+                color="warning"
+                text-color="white"
               />
-            </QItemLabel>
-          </QItemSection>
-        </QItem>
-      </QList>
+            </QItemSection>
+          </QItem>
+        </QList>
+      </template>
     </QBtnDropdown>
 
     <QChip
@@ -398,6 +448,12 @@ export default {
         />
       </div>
     </QDialog>
+
+    <SubscriptionDialog
+      :opened="subscriptionModalOpened"
+      @confirm="redirectToPlans"
+      @cancel="subscriptionModalOpened = false"
+    />
 
     <QSpace />
 

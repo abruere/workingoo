@@ -1,19 +1,20 @@
 {
-    "name": "Stelace",
-    "short_name": "Stelace",
+    "name": "Workingoo",
+    "short_name": "Workingoo",
     "icons": [
         {
-            "src": "/android-chrome-192x192.png",
+            "src": "/statics/android-chrome-192x192.png?v=Gvm5WNkn5j",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/android-chrome-512x512.png",
+            "src": "/statics/android-chrome-512x512.png?v=Gvm5WNkn5j",
             "sizes": "512x512",
             "type": "image/png"
         }
     ],
-    "theme_color": "#1055b6",
+    "theme_color": "#1c3661",
     "background_color": "#ffffff",
+    "start_url": "https://www.workingoo.com",
     "display": "standalone"
 }
