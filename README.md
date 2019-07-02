@@ -1,23 +1,20 @@
 [![Stelace-platform-runner](https://user-images.githubusercontent.com/12909094/59638847-c41f1900-9159-11e9-9fa5-6d7806d57c92.png)](https://stelace.com)
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/stelace/stelace-instant)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/stelace/jobs-marketplace-template)
 
-# Vue marketplace template
+# Workingoo
 
-> This Stelace template is free to use, under the terms of the [MIT license](./LICENSE).
-Feel free to fork, contribute or just make it your own :heart:.
+> Forked from [Stelace Marketplace template](https://github.com/stelace/jobs-marketplace-template):
+**Full Vue.js marketplace front-end with pre-configured serverless deployment**.
+A lighter platform template focused on search and automation is [also available](https://github.com/stelace/heroes-platform-demo).
 
 ---
-
-This template offers **a full Vue.js marketplace front-end with pre-configured serverless deployment**.
-
-![stellar-jobs-screenshot](https://user-images.githubusercontent.com/12909094/60470099-762d0980-9c5f-11e9-8d78-0bade89101c4.jpg)
-
-A lighter platform template focused on search and automation is [also available](https://github.com/stelace/heroes-platform-demo).
 
 **What is Stelace?**
 
 [Stelace](https://stelace.com/) provides search, inventory and user management infrastructure for Web platforms, ranging from search-intensive marketplaces to online community apps. Stelace offers powerful backend and APIs including advanced search, automation, and content delivery, to let you focus on what makes your platform unique.
+
+[API Docs](https://stelace.com/docs)
 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 ---
@@ -67,11 +64,13 @@ You will be able to use [official Stelace dashboard](https://stelace.com), enabl
 
 You first need to get your Stelace API Key. Good news: [it’s free](https://stelace.com/pricing).
 
-1. Clone this repository
+> Note: this template uses advanced features available in _Business_ plans or higher, such as Organizations.
+
+1. Clone this repository (replace with your fork URL)
 
 ```
-git clone https://github.com/stelace/stelace-instant.git
-cd stelace-instant
+git clone https://github.com/stelace/jobs-marketplace-template.git
+cd jobs-marketplace-template
 ```
 
 2. Install node_modules
@@ -113,39 +112,6 @@ cp scripts/data.example.js scripts/data.js
 node scripts/init-data.js
 ```
 
-<details>
-<summary>For Stelace Team or partners developing with on-premise API server.</summary>
-
-Stelace Core API server has to be launched locally before starting this project's server.
-
-First we need to launch services needed by Stelace Core API.
-
-```
-docker-compose up -d elasticsearch postgresql redis
-```
-
-Then we need to initialize the database with Instant configuration.
-
-```
-cd /path/to/stelace-core
-git checkout dev
-yarn setup:instant
-```
-
-Secret and publishable api keys will be displayed so you can use it as environment variables for this project.
-
-Let’s start the server.
-
-```
-yarn start
-```
-
-You’ll probably need to set some environment variables such as STELACE_API_URL (http://127.0.0.1:API_PORT).
-
-Please refer to`.env.example`.
-
-</details>
-
 ## Deployment
 
 We’ve set up continuous deployment for you with Netlify.
@@ -153,3 +119,9 @@ We’ve set up continuous deployment for you with Netlify.
 You just have to click "_Deploy to netlify_" above and follow the instructions to deploy.
 
 Please refer to [deployment docs section](./docs/deployment.md) for more details or alternatives.
+
+### Branches for continuous deployment
+
+- `dev` for development and test environment
+- `workingoo` for live environment, automatically deployed after any commit on this branch
+- `master` is used to pull changes from upstream
