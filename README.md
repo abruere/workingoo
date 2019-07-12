@@ -6,13 +6,15 @@
 
 > Forked from [Stelace Marketplace template](https://github.com/stelace/jobs-marketplace-template):
 **Full Vue.js marketplace front-end with pre-configured serverless deployment**.
+
 A lighter platform template focused on search and automation is [also available](https://github.com/stelace/heroes-platform-demo).
 
 ---
 
 **What is Stelace?**
 
-[Stelace](https://stelace.com/) provides search, inventory and user management infrastructure for Web platforms, ranging from search-intensive marketplaces to online community apps. Stelace offers powerful backend and APIs including advanced search, automation, and content delivery, to let you focus on what makes your platform unique.
+[Stelace API](https://stelace.com/) provides search, inventory and user management infrastructure for Web platforms, ranging from search-intensive marketplaces to online community apps.
+Stelace offers powerful backend and APIs including advanced search, automation, and content delivery, to let you focus on what makes your platform unique.
 
 [API Docs](https://stelace.com/docs)
 
@@ -62,30 +64,33 @@ You will be able to use [official Stelace dashboard](https://stelace.com), enabl
 
 ## Getting started
 
-You first need to get your Stelace API Key. Good news: [it’s free](https://stelace.com/pricing).
+You first need to get your Stelace API Keys. Good news: [it’s free](https://stelace.com/pricing).
 
 > Note: this template uses advanced features available in _Business_ plans or higher, such as Organizations.
 
 1. Clone this repository (replace with your fork URL)
 
-```
+```sh
 git clone https://github.com/stelace/jobs-marketplace-template.git
 cd jobs-marketplace-template
 ```
 
 2. Install node_modules
 
-```
+```sh
+# using yarn instead of npm is recommended
 yarn
-# or
-npm install
 ```
+
+> If you don’t have [yarn](https://yarnpkg.com/) installed, you can follow these [instructions](https://yarnpkg.com/docs/install).
 
 3. Create environment files for development and production.
+
 You can copy `.env.example` and fill it with Stelace API keys.
 
-```
+```sh
 cp .env.example .env.development
+# You may want to use live keys in this file
 cp .env.example .env.production
 ```
 
@@ -97,9 +102,9 @@ You need to fill the following environment variables:
 
 4. Start the development server
 
-```
+```sh
 yarn dev
-# or
+# same as
 quasar dev
 ```
 
@@ -107,9 +112,8 @@ Please refer to [Quasar docs](https://v1.quasar-framework.org/) for more details
 
 5. Seed development [data](./docs/development-data.md)
 
-```
-cp scripts/data.example.js scripts/data.js
-node scripts/init-data.js
+```sh
+yarn seed
 ```
 
 ## Deployment
