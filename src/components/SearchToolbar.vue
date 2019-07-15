@@ -83,12 +83,16 @@ export default {
       'isPremium',
       'isSearchMapVisible',
       'searchOptions',
-      'searchModes'
+      'searchModes',
+      'searchAfterMapMoveActive',
     ])
   },
   methods: {
     toggleSearchMap (visible) {
       this.$store.commit(mutationTypes.TOGGLE_SEARCH_MAP, { visible, save: true })
+      this.$store.commit(mutationTypes.SEARCH__SET_MAP_OPTIONS, { useMapCenter: visible })
+
+      if (this.searchAfterMapMoveActive) this.triggerSearch()
     },
     toggleFilterDialog () {
       this.$store.commit(mutationTypes.TOGGLE_FILTER_DIALOG)
