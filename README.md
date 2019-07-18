@@ -19,6 +19,7 @@ Stelace offers powerful backend and APIs including advanced search, automation, 
 [API Docs](https://stelace.com/docs)
 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/5f94a520-42b2-47b6-9c69-c9797b02bd15/deploy-status)](https://app.netlify.com/sites/stelace-instant-workingoo/deploys)
 ---
 
 ## Features :gift:
@@ -128,4 +129,21 @@ Please refer to [deployment docs section](./docs/deployment.md) for more details
 
 - `dev` for development and test environment
 - `workingoo` for live environment, automatically deployed after any commit on this branch
-- `master` is used to pull changes from upstream
+- `master` is used to pull changes from `upstream/master`, and must be kept in exact sync with no local change.
+
+Usual sequence of commands:
+
+```sh
+git checkout master
+git fetch upstream
+git merge upstream/master
+git checkout dev
+# Resolve any conflict
+git merge master
+# Check everything is ok on staging website (Netlify CD)
+git push
+# Deploy live
+git checkout workingoo
+git merge dev
+git push
+```
