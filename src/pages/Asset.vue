@@ -154,7 +154,7 @@
 
           <AppSwitchableEditor
             tag="p"
-            class="q-mb-lg q-mx-sm text-justify"
+            class="q-mb-lg q-mx-sm text-left"
             :value="activeAsset.description"
             :active="isCurrentUserTheOwner"
             :custom-save="updateAssetFn('description')"

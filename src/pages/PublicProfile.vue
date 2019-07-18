@@ -471,7 +471,7 @@ export default {
 
           <AppSwitchableEditor
             tag="p"
-            class="text-body1 q-ma-lg text-justify"
+            class="text-body1 q-ma-lg text-left"
             :value="selectedUser.description"
             :active="isCurrentUser"
             :custom-save="updateUserFn('description')"
