@@ -1,7 +1,7 @@
 <script>
 import { mapState, mapGetters } from 'vuex'
 import * as mutationTypes from 'src/store/mutation-types'
-import { debounce, pickBy, values } from 'lodash'
+import { debounce, pickBy, values, get, compact, uniqBy } from 'lodash'
 import { date } from 'quasar'
 
 import AppSVGActionButton from 'src/components/AppSVGActionButton'
@@ -71,6 +71,11 @@ export default {
     showPremiumCtaIfReversedMode () {
       return this.isProvider && !this.isPremium
     },
+    showDates () {
+      const assetTypesIds = uniqBy(get(this.searchModeConfig, 'assetTypesIds') || [])
+      const assetTypes = compact(assetTypesIds.map(assetTypeId => this.common.assetTypesById[assetTypeId]))
+      return assetTypes.some(assetType => assetType.timeBased)
+    },
     ...mapState([
       'layout',
       'route',
@@ -84,6 +89,7 @@ export default {
       'isSearchMapVisible',
       'searchOptions',
       'searchModes',
+      'searchModeConfig',
       'searchAfterMapMoveActive',
     ])
   },
@@ -395,6 +401,7 @@ export default {
           />
 
           <DateRangePicker
+            v-show="showDates"
             class="q-my-lg"
             :start-date="search.startDate"
             :end-date="search.endDate"

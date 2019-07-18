@@ -97,12 +97,19 @@
             input-type="number"
           >
             <AppContent
+              v-if="activeAsset.assetType.timeBased"
               entry="pricing"
               field="price_per_time_unit_label"
               :options="{
                 price: $fx(activeAsset.price),
                 timeUnit: activeAsset.timeUnit
               }"
+            />
+            <AppContent
+              v-else
+              entry="pricing"
+              field="price_with_currency"
+              :options="{ price: $fx(activeAsset.price) }"
             />
           </AppSwitchableEditor>
         </div>
@@ -127,9 +134,9 @@
             <!-- We only keep truthy customAttributes values but depending on UI we could need those as well -->
             <!-- For instance: `smoking: false` -->
             <div
-              v-for="attribute in assetCustomAttributes.filter(ca => !!ca.value)"
+              v-for="attribute in assetCustomAttributes.filter(ca => !!ca.value && ca.type === 'boolean')"
               :key="attribute.name"
-              class="non-selectable col-12 col-sm-4 q-mb-md"
+              class="non-selectable col-12 col-sm-4 q-mb-sm"
             >
               <QIcon
                 class="q-mr-sm"
@@ -147,7 +154,7 @@
 
           <AppSwitchableEditor
             tag="p"
-            class="q-my-lg q-mx-sm text-justify"
+            class="q-mb-lg q-mx-sm text-justify"
             :value="activeAsset.description"
             :active="isCurrentUserTheOwner"
             :custom-save="updateAssetFn('description')"
@@ -155,6 +162,47 @@
             allow-falsy-save
             input-type="textarea"
           />
+
+          <div v-if="assetCustomAttributes.length">
+            <div
+              v-for="attribute in assetCustomAttributes.filter(
+                ca => !!ca.value && ca.type === 'text' && ca.value.length > shortTextMaxLength
+              )"
+              :key="attribute.name"
+            >
+              <div class="q-mb-lg">
+                <AppContent
+                  tag="h3"
+                  class="text-h4 q-mt-sm text-weight-medium"
+                  :entry="attribute.label.entry"
+                  :field="attribute.label.field"
+                  :default-message="attribute.label.default"
+                />
+                <div>
+                  {{ attribute.value }}
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-for="attribute in assetCustomAttributes.filter(
+                ca => !!ca.value && ca.type === 'text' && ca.value.length <= shortTextMaxLength
+              )"
+              :key="attribute.name"
+            >
+              <div class="row">
+                <AppContent
+                  class="text-weight-medium col-12 col-sm-4 q-mb-sm"
+                  :entry="attribute.label.entry"
+                  :field="attribute.label.field"
+                  :default-message="attribute.label.default"
+                />
+                <div class="col-12 col-sm-4 q-mb-md">
+                  {{ attribute.value }}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <section
@@ -249,7 +297,8 @@ export default {
   data () {
     return {
       ownerSimilarAssets: [],
-      similarAssets: []
+      similarAssets: [],
+      shortTextMaxLength: 128,
     }
   },
   meta () { // SEO, overriding any hard-coded content in translations
