@@ -97,7 +97,7 @@
             input-type="number"
           >
             <AppContent
-              v-if="activeAsset.assetType.timeBased"
+              v-if="activeAsset.assetType && activeAsset.assetType.timeBased"
               entry="pricing"
               field="price_per_time_unit_label"
               :options="{
@@ -119,10 +119,10 @@
           :items="getResourceGalleryItems(activeAsset)"
         />
 
-        <div class="q-px-sm q-my-lg text-body1">
+        <div class="q-pa-sm text-body1">
           <AppContent
             tag="h3"
-            class="text-h4 q-mt-sm text-weight-medium"
+            class="text-h4 text-weight-medium"
             entry="asset"
             field="description_label"
           />
@@ -131,7 +131,7 @@
             v-if="assetCustomAttributes.length"
             class="row text-weight-medium q-py-sm"
           >
-            <!-- We only keep truthy customAttributes values but depending on UI we could need those as well -->
+            <!-- We only keep truthy customAttributes values but depending on UI we could need falsy ones as well -->
             <!-- For instance: `smoking: false` -->
             <div
               v-for="attribute in assetCustomAttributes.filter(ca => !!ca.value && ca.type === 'boolean')"
@@ -154,7 +154,7 @@
 
           <AppSwitchableEditor
             tag="p"
-            class="q-mb-lg q-mx-sm text-left"
+            class="q-my-lg q-mx-sm text-left"
             :value="activeAsset.description"
             :active="isCurrentUserTheOwner"
             :custom-save="updateAssetFn('description')"
@@ -163,7 +163,7 @@
             input-type="textarea"
           />
 
-          <div v-if="assetCustomAttributes.length">
+          <div v-if="assetCustomAttributes.length" class="q-py-sm">
             <div
               v-for="attribute in assetCustomAttributes.filter(
                 ca => !!ca.value && ca.type === 'text' && ca.value.length > shortTextMaxLength
