@@ -45,6 +45,12 @@ export const defaultRoutes = {
       meta: {}
     },
     {
+      name: 'recruiters',
+      path: 'r',
+      component: () => import(/* webpackChunkName: 'landing' */ 'pages/Recruiters.vue'),
+      meta: {}
+    },
+    {
       name: 'publicProfile',
       path: 'p/:id',
       component: () => import(/* webpackChunkName: 'search' */ 'pages/PublicProfile.vue'),
