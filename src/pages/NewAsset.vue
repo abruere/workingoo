@@ -4,7 +4,6 @@ import { mapState, mapGetters } from 'vuex'
 import { date } from 'quasar'
 
 import EventBus from 'src/utils/event-bus'
-import { isValidDateString } from 'src/utils/time'
 import { extractLocationDataFromPlace } from 'src/utils/places'
 import logger from 'src/utils/logger'
 
@@ -47,7 +46,6 @@ export default {
       options: ['option1'],
       selectedCategory: null,
       editingAssetType: null,
-      visibleStep: 1,
       requestAuthentication: false,
       editingCustomAttributes: {},
       assetImages: [],
@@ -57,6 +55,9 @@ export default {
     }
   },
   computed: {
+    isRecruiters () {
+      return this.route.name === 'recruiters'
+    },
     defaultAssetType () {
       const assetTypesConfig = get(this.common.config, 'stelace.instant.assetTypes')
       if (!assetTypesConfig) return this.assetTypes[0]
@@ -121,39 +122,6 @@ export default {
       const locations = this.locations
       return get(locations, '[0].shortDisplayName', '')
     },
-    step () {
-      const steps = [
-        true, // fictive step 0
-        true,
-        false,
-        false,
-        false,
-      ]
-
-      if (this.name.length >= 1) { // with high debounce to reduce distraction while typing
-        steps[2] = true
-      }
-      if (this.selectedCategory && this.selectedCategory.name && !isNaN(parseInt(this.price))) {
-        steps[3] = true
-      }
-
-      let isValidStartDate = true
-      let isValidEndDate = true
-      if (this.startDate) {
-        isValidStartDate = isValidDateString(this.startDate)
-      }
-      if (this.endDate) {
-        isValidEndDate = isValidDateString(this.endDate)
-      }
-
-      if (!this.showAvailabilityDates || (this.showAvailabilityDates && this.startDate && isValidStartDate && isValidEndDate)) {
-        // endDate is optional, so is quantity
-        steps[4] = true
-      }
-
-      // Index of first falsy step
-      return steps.indexOf(false) >= 0 ? steps.indexOf(false) - 1 : steps.length - 1
-    },
     reusableImages () {
       return this.currentUser.id ? this.currentUser.images : []
     },
@@ -162,6 +130,7 @@ export default {
       'common',
       'content',
       'style',
+      'route',
     ]),
     ...mapGetters([
       'currentUser',
@@ -381,7 +350,52 @@ export default {
 
 <template>
   <BasicHeroLayout>
-    <template v-slot:heroContent>
+    <template
+      v-if="isRecruiters"
+      v-slot:heroContentContainer
+    >
+      <div class="row items-center">
+        <div class="col-md-6">
+          <q-img
+            src="statics/images/banner-img.jpg"
+          />
+        </div>
+        <div class="col-md-6">
+          <q-list
+            dense
+            number
+            padding
+            class="text-left text-white"
+          >
+            <q-item
+              class="q-pa-md text-h5"
+            >
+              <q-item-section>
+                {{ $t({ id: 'pages.recruiters.itemOne' }) }}
+              </q-item-section>
+            </q-item>
+            <q-item
+              class="q-pa-md text-h5"
+            >
+              <q-item-section>
+                {{ $t({ id: 'pages.recruiters.itemTwo' }) }}
+              </q-item-section>
+            </q-item>
+            <q-item
+              class="q-pa-md text-h5"
+            >
+              <q-item-section>
+                {{ $t({ id: 'pages.recruiters.itemThree' }) }}
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+      </div>
+    </template>
+    <template
+      v-if="!isRecruiters"
+      v-slot:heroContent
+    >
       <AppContent
         class="text-h4"
         tag="h1"
@@ -402,7 +416,10 @@ export default {
         @submit.prevent="createAsset"
       >
         <div class="step-1 q-py-lg">
-          <div class="text-h5">
+          <div
+            v-show="!isRecruiters"
+            class="text-h5"
+          >
             {{ $t({ id: 'pages.new_asset.form_header' }) }}
           </div>
           <div class="row justify-center">
@@ -418,6 +435,8 @@ export default {
               ]"
               debounce="500"
               autogrow
+              square
+              outlined
               required
             />
           </div>
@@ -433,7 +452,8 @@ export default {
               ]"
               class="row-input -small"
               :readonly="isAssetTypeReadonly"
-              bottom-slots
+              square
+              outlined
               @change="selectAssetType"
             />
           </div>
@@ -441,7 +461,6 @@ export default {
 
         <transition enter-active-class="animated fadeInUp">
           <div
-            v-if="step > 1"
             class="step-2 q-py-lg"
           >
             <div class="row justify-between">
@@ -454,7 +473,8 @@ export default {
                     selectedCategory => !!selectedCategory ||
                       $t({ id: 'form.error.missing_field' })
                   ]"
-                  bottom-slots
+                  square
+                  outlined
                   @change="selectCategory"
                 />
               </div>
@@ -468,7 +488,8 @@ export default {
                       $t({ id: 'form.error.missing_price' })
                   ]"
                   required
-                  bottom-slots
+                  square
+                  outlined
                 />
               </div>
             </div>
@@ -477,7 +498,6 @@ export default {
 
         <transition enter-active-class="animated fadeInUp">
           <div
-            v-if="step > 2"
             class="step-3 q-py-lg"
           >
             <DateRangePicker
@@ -487,7 +507,8 @@ export default {
               :end-date="endDate"
               :missing-end-date-meaning="$t({ id: 'time.missing_end_date_meaning' })"
               start-date-required
-              bottom-slots
+              square
+              outlined
               @changeStartDate="selectStartDate"
               @changeEndDate="selectEndDate"
             />
@@ -497,7 +518,8 @@ export default {
                 <PlacesAutocomplete
                   :label="$t({ id: 'places.address_placeholder' })"
                   :initial-query="locationName"
-                  bottom-slots
+                  square
+                  outlined
                   @selectPlace="selectPlace"
                 />
               </div>
@@ -513,7 +535,8 @@ export default {
                     quantity => parseFloat(quantity) > 0 ||
                       $t({ id: 'form.error.missing_field' })
                   ]"
-                  bottom-slots
+                  square
+                  outlined
                 />
               </div>
             </div>
@@ -522,7 +545,6 @@ export default {
 
         <transition enter-active-class="animated fadeInUp">
           <div
-            v-if="step > 3"
             class="step-4 q-py-lg"
           >
             <div class="row justify-between">
@@ -538,6 +560,8 @@ export default {
                       $t({ id: 'form.error.missing_description' })
                   ]"
                   type="textarea"
+                  square
+                  outlined
                   required
                 />
               </div>
@@ -565,16 +589,22 @@ export default {
               />
             </div>
 
-            <QBtn
+            <q-btn
               class="q-my-md text-weight-bold"
               :loading="creatingAsset"
-              :label="$t( { id: 'prompt.create_button' })"
               :rounded="style.roundedTheme"
-              :disabled="step < 4 || !uploaderFiles.length"
+              :disabled="!uploaderFiles.length"
               color="secondary"
               size="lg"
               type="submit"
-            />
+            >
+              <div v-if="isRecruiters">
+                {{ $t( { id: 'pages.recruiters.ad_button' }) }}
+              </div>
+              <div v-else>
+                {{ $t( { id: 'prompt.create_button' }) }}
+              </div>
+            </q-btn>
             <AppContent
               v-show="!uploaderFiles.length"
               tag="div"

@@ -99,9 +99,6 @@ prompt:
     en: Create
     fr: Créer
     context: Used for any type of resource (contact, asset, content…)
-  ad_button:
-    en: Post the ad
-    fr: Poster l'annonce
   login_to_know_more:
     en: Login to know more.
     fr: Connectez-vous pour en savoir plus.

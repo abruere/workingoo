@@ -30,3 +30,52 @@ pages:
     asset_gallery_header:
       en: Last job openings
       fr: Dernières offres d’emploi publiées sur {SERVICE_NAME}
+  recruiters:
+    page_title:
+      en: New listing - {SERVICE_NAME}
+      fr: Nouvelle annonce {SERVICE_NAME}
+      context: Window/Tab title (SEO).
+    meta_description:
+      en: Create your own listing in no time.
+      fr: Créez votre propre annonce en quelques instants.
+    itemOne:
+      en: 1. Type your ad for free.
+      fr: 1. Saississez votre annonce gratuitement
+    itemTwo:
+      en: 2. Create your recruiter account
+      fr: 2. Créez votre compte recruteur
+    itemThree:
+      en: 3. Find the right candidates to complete your team
+      fr: 3. Trouvez les bons candidats pour compléter votre équipe
+    header__EDITOR_LABEL:
+      en: Main header of your listing creation page
+      fr: En-tête principal de la page création d'annonce
+    subheader:
+      en: It’s fast and free.
+      fr: C’est simple et gratuit.
+    tagline:
+      en: Recruiters, Quickly find the best candidates to succeed in your season !
+      fr: Recruteurs, Trouvez rapidement les meilleurs candidats pour réussir votre saison !
+    publication_status:
+      en: |
+        {published, select,
+            after_validation {Your listing will be published after validation by {SERVICE_NAME}}
+            now {Your listing is now online.}
+            other {}
+        }
+      fr: |
+        {published, select,
+            after_validation {Votre annonce sera publiée très prochainement après validation par {SERVICE_NAME}.}
+            now {Votre annonce vient d’être publiée.}
+            other {}
+        }
+    picture_incentive:
+      en: Beautiful pictures make a difference…
+      fr: De belles images font la différence…
+    picture_incentive__EDITOR_LABEL:
+      en: "Incentive to upload attractive images"
+      fr: "Incitation à présenter des images de qualité"
+    ad_button: 
+      en: Post the ad
+      fr: Poster l'annonce
+
