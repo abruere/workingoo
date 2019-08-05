@@ -76,18 +76,6 @@ export default {
       if (defaultType) return defaultType
       else return this.assetTypes[0]
     },
-    showSelectAssetType () {
-      if (this.filteredAssetTypesIds) return this.filteredAssetTypesIds.length > 1
-      else return this.assetTypes.length > 1
-    },
-    filteredAssetTypesIds () {
-      const config = this.common.config
-      const assetTypesConfig = get(config, 'stelace.instant.assetTypes')
-
-      if (!assetTypesConfig) return null
-
-      return Object.keys(assetTypesConfig)
-    },
     isAssetTypeReadonly () {
       return !!this.asset.asset.id
     },
@@ -178,6 +166,7 @@ export default {
     ...mapGetters([
       'currentUser',
       'canPublishAsset',
+      'activeAssetTypes',
     ]),
   },
   async preFetch ({ store }) {
@@ -416,26 +405,10 @@ export default {
           <div class="text-h5">
             {{ $t({ id: 'pages.new_asset.form_header' }) }}
           </div>
-          <div class="q-mt-md row justify-center">
-            <SelectAssetType
-              v-if="showSelectAssetType"
-              :filtered-ids="filteredAssetTypesIds"
-              :initial-asset-type="selectedAssetType"
-              :label="$t({ id: 'asset.asset_type_label' })"
-              :show-search-icon="false"
-              :rules="[
-                selectedAssetType => !!selectedAssetType ||
-                  $t({ id: 'form.error.missing_field' })
-              ]"
-              :readonly="isAssetTypeReadonly"
-              bottom-slots
-              @change="selectAssetType"
-            />
-          </div>
           <div class="row justify-center">
             <QInput
               v-model="name"
-              class="name-input"
+              class="row-input"
               :label="$t({ id: 'asset.name_label' })"
               :counter="name.length > nameMaxLength / 2"
               :maxlength="nameMaxLength"
@@ -443,9 +416,24 @@ export default {
                 name => !!name ||
                   $t({ id: 'form.error.missing_title' })
               ]"
-              debounce="1000"
+              debounce="500"
               autogrow
               required
+            />
+          </div>
+          <div class="q-mt-md row justify-center">
+            <SelectAssetType
+              :initial-asset-type="selectedAssetType"
+              :label="$t({ id: 'asset.asset_type_label' })"
+              :show-search-icon="false"
+              :rules="[
+                selectedAssetType => !!selectedAssetType ||
+                  $t({ id: 'form.error.missing_field' })
+              ]"
+              class="row-input -small"
+              :readonly="isAssetTypeReadonly"
+              bottom-slots
+              @change="selectAssetType"
             />
           </div>
         </div>
@@ -601,9 +589,14 @@ export default {
 </template>
 
 <style lang="stylus" scoped>
-.name-input
-  // Using flex-basis instead of max-width for IE11
-  // https://github.com/philipwalton/flexbugs#flexbug-17
-  flex: 1 0 30rem
+.row-input
+  flex: 1 0
   min-width: 0
+  @media (min-width $breakpoint-sm-min)
+    // Using flex-basis instead of max-width for IE11
+    // https://github.com/philipwalton/flexbugs#flexbug-17
+    flex: 0 0 30rem
+  &.-small
+    @media (min-width $breakpoint-sm-min)
+      flex: 0 0 20rem
 </style>

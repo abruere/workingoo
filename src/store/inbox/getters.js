@@ -101,9 +101,24 @@ export function conversations (state, getters, rootState, rootGetters) {
 
     const canAccess = canAccessConversation({ isProvider, isPremium, currentUser, conversationId })
 
+    let transactionAsset
+    if (transactionId) {
+      transactionAsset = get(transaction, 'assetSnapshot', {})
+      const assetType = transaction.assetType
+
+      transactionAsset = populateAsset({
+        asset: transactionAsset,
+        usersById: {},
+        categoriesById,
+        assetTypesById: {
+          [transaction.assetTypeId]: assetType
+        }
+      })
+    }
+
     const conversation = {
       id: conversationId,
-      asset: transactionId ? get(transaction, 'assetSnapshot', {}) : asset,
+      asset: transactionId ? transactionAsset : asset,
       transaction,
       transactionActions,
       ratingsPrompt,

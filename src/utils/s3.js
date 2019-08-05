@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { get } from 'lodash'
 
-const publicKey = process.env.STELACE_PUBLISHABLE_API_KEY
+const publishable = process.env.STELACE_PUBLISHABLE_API_KEY
 
 // Ensures we use an appropriate file 'path' prefix when uploading to S3
 export function cleanPrefix (prefix = '') {
@@ -12,7 +12,7 @@ export function cleanPrefix (prefix = '') {
 }
 
 /**
- * @param  {String} file - Filename
+ * @param  {Object} file - having name and type properties
  * @param  {Object} [options]
  * @param  {Object} [options.folder] - For easier maintenance add S3 "folder" prefix (without leading /)
  */
@@ -24,11 +24,14 @@ export function getS3SignedUrl (file, { folder = 'files' } = {}) {
       cleanPrefix(process.env.VUE_APP_CDN_UPLOAD_PREFIX)
     }${folder}`,
     {
-      headers: { 'x-api-key': publicKey },
+      headers: { 'x-api-key': publishable },
     }
   )
     .then(({ data: S3Sign }) => {
-      const fields = Object.keys(S3Sign.params).map(name => ({ name, value: S3Sign.params[name] }))
+      const fields = Object.keys(S3Sign.params).map(name => {
+        let value = S3Sign.params[name]
+        return { name, value }
+      })
       fields.push({ name: 'content-type', value: file.type })
 
       const baseUrl = S3Sign.endpoint_url

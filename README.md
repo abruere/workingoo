@@ -1,8 +1,11 @@
 [![Stelace-platform-runner](https://user-images.githubusercontent.com/12909094/59638847-c41f1900-9159-11e9-9fa5-6d7806d57c92.png)](https://stelace.com)
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/stelace/jobs-marketplace-template)
-
 # Workingoo
+
+**Deploy status**:
+
+- Live [![Netlify Status](https://api.netlify.com/api/v1/badges/5f94a520-42b2-47b6-9c69-c9797b02bd15/deploy-status)](https://app.netlify.com/sites/stelace-instant-workingoo/deploys)
+- Test  [![Netlify Status](https://api.netlify.com/api/v1/badges/117d635e-a70a-4589-9b95-d4394fc48672/deploy-status)](https://app.netlify.com/sites/stelace-instant-workingoo-test/deploys)
 
 > Forked from [Stelace Marketplace template](https://github.com/stelace/jobs-marketplace-template):
 **Full Vue.js marketplace front-end with pre-configured serverless deployment**.
@@ -19,7 +22,7 @@ Stelace offers powerful backend and APIs including advanced search, automation, 
 [API Docs](https://stelace.com/docs)
 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
-[![Netlify Status](https://api.netlify.com/api/v1/badges/5f94a520-42b2-47b6-9c69-c9797b02bd15/deploy-status)](https://app.netlify.com/sites/stelace-instant-workingoo/deploys)
+
 ---
 
 ## Features :gift:
@@ -127,8 +130,9 @@ Please refer to [deployment docs section](./docs/deployment.md) for more details
 
 ### Branches for continuous deployment
 
-- `dev` for development and test environment
-- `workingoo` for live environment, automatically deployed after any commit on this branch
+- `dev` for development and _test_ environment, including pending PRs deployed to [Netlify preview subdomains](
+  https://www.netlify.com/docs/continuous-deployment/#branches-deploys)
+- `workingoo` for _live_ environment, automatically deployed after any commit on this branch
 - `master` is used to pull changes from `upstream/master`, and must be kept in exact sync with no local change.
 
 Usual sequence of commands:

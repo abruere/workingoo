@@ -1,13 +1,34 @@
 import Vue from 'vue'
 import { get, isArrayLike, isEmpty } from 'lodash'
+import { Cdn } from 'sharp-aws-image-handler-client'
 
 import { mergeLocalAndAPIEntries, TRANSFORMED_KEYS } from 'src/utils/content'
-import { getImageUrl } from 'src/utils/image'
 
+const cdn = new Cdn({
+  base: process.env.VUE_APP_CDN_WITH_IMAGE_HANDLER_URL,
+  bucket: process.env.VUE_APP_CDN_S3_BUCKET,
+  servedFromCdnBucket: (uri, base, bucketUrl) => {
+    const devBucket = process.env.VUE_APP_CDN_S3_DEV_BUCKET
+
+    if (
+      uri.startsWith(base) ||
+      uri.startsWith(bucketUrl) ||
+      uri.startsWith('https://cdn.instant.stelace.com') // legacy domain
+    ) {
+      return true
+    } else if (
+      devBucket && (
+        uri.startsWith(`https://${devBucket}.s3.amazonaws.com`) ||
+        uri.startsWith('https://dev-cdn.instant.stelace.com') // legacy domain
+      )
+    ) {
+      return devBucket
+    }
+
+    return false
+  }
+})
 const isDevDebuggingStyles = process.env.DEV && process.env.VUE_APP_DEBUG_STYLES === 'true'
-const cdnUrl = process.env.VUE_APP_CDN_WITH_IMAGE_HANDLER_URL
-const cdnS3Url = process.env.VUE_APP_CDN_S3_URL
-const webPFilter = 'format(webp)'
 
 export function entries (state) {
   const { apiEntries, localEntries, locale } = state
@@ -61,12 +82,12 @@ export function termsPath (state, getters) {
 
 export function homeHeroUrlTransformed (state, getters, rootState) {
   const url = rootState.style.homeHeroUrl || ''
-  const hasThumborFilters = url.indexOf('filters:') > -1
 
-  if (url && servedFromCdn(url) && !hasThumborFilters && state.acceptWebP) {
-    return getImageUrl(url).filter(webPFilter).buildUrl()
+  if (url && cdn.servedFromCdnBucket(url)) {
+    return cdn.getUrl(url, {
+      webp: state.acceptWebP
+    })
   }
-
   return url
 }
 
@@ -101,11 +122,11 @@ export function getAvatarImageUrl (state, getters) {
     const imgUri = user.avatarUrl || ''
     const avatarSquareSize = Math.round(resolution) * getters.avatarImageWidth
 
-    return servedFromCdn(imgUri)
-      ? getImageUrl(imgUri)
-        .resize(avatarSquareSize, avatarSquareSize)
-        .filter(state.acceptWebP ? webPFilter : '')
-        .buildUrl()
+    return cdn.servedFromCdnBucket(imgUri)
+      ? cdn.getUrl(imgUri, {
+        webp: state.acceptWebP,
+        resize: { width: avatarSquareSize, height: avatarSquareSize }
+      })
       : imgUri
   }
 }
@@ -115,12 +136,12 @@ export function getBaseImageUrl (state, getters) {
   return (resource, { accessorString, index = 0 } = {}) => {
     const imgUri = getImageUri(resource, { accessorString, index })
 
-    return servedFromCdn(imgUri)
-      ? getImageUrl(imgUri)
-        .resize(getters.baseImageWidth, getters.baseImageHeight)
-        .filter(state.acceptWebP ? webPFilter : '')
-        .buildUrl()
-      : (isDevDebuggingStyles ? getters.placeholderImage : imgUri)
+    return cdn.servedFromCdnBucket(imgUri)
+      ? cdn.getUrl(imgUri, {
+        webp: state.acceptWebP,
+        resize: { width: getters.baseImageWidth, height: getters.baseImageHeight }
+      })
+      : imgUri || (isDevDebuggingStyles ? getters.placeholderImage : '')
   }
 }
 
@@ -128,12 +149,12 @@ export function getLargeImageUrl (state, getters) {
   return (resource, { accessorString, index = 0 } = {}) => {
     const imgUri = getImageUri(resource, { accessorString, index })
 
-    return servedFromCdn(imgUri)
-      ? getImageUrl(imgUri)
-        .resize(getters.largeImageWidth, getters.largeImageHeight)
-        .filter(state.acceptWebP ? webPFilter : '')
-        .buildUrl()
-      : (isDevDebuggingStyles ? getters.placeholderImage : imgUri)
+    return cdn.servedFromCdnBucket(imgUri)
+      ? cdn.getUrl(imgUri, {
+        webp: state.acceptWebP,
+        resize: { width: getters.largeImageWidth, height: getters.largeImageHeight }
+      })
+      : imgUri || (isDevDebuggingStyles ? getters.placeholderImage : '')
   }
 }
 
@@ -210,8 +231,4 @@ function getAccessorString (index) {
 
 function getImageUri (resource, { accessorString, index = 0 } = {}) {
   return accessorString ? get(resource, accessorString, '') : get(resource, getAccessorString(index), '')
-}
-
-function servedFromCdn (url) {
-  return typeof url === 'string' && (url.startsWith(cdnUrl) || url.startsWith(cdnS3Url))
 }
