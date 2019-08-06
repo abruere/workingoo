@@ -368,7 +368,7 @@ export default {
             class="text-white col-12 q-ml-xl recuiters-list"
           >
             <q-item
-              class="text-h4 q-mt-md q-mb-xxl"
+              class="text-h5 q-mt-md q-mb-xl q-xs-mb-xl q-xs-mt-xl"
             >
               <q-item-section avatar>
                 <q-avatar color="warning" text-color="white" class="text-h4">
@@ -380,7 +380,7 @@ export default {
               </q-item-section>
             </q-item>
             <q-item
-              class="text-h4  q-mt-xl q-mb-xxl"
+              class="text-h5 q-mt-xl q-mb-xl q-xs-mb-xl q-xs-mt-xl"
             >
               <q-item-section avatar>
                 <q-avatar color="warning" text-color="white">
@@ -392,7 +392,7 @@ export default {
               </q-item-section>
             </q-item>
             <q-item
-              class="text-h4  q-mb-md"
+              class="text-h5 q-mb-md"
             >
               <q-item-section avatar>
                 <q-avatar color="warning" text-color="white">
@@ -438,11 +438,13 @@ export default {
             {{ $t({ id: 'pages.new_asset.form_header' }) }}
           </div>
           <div class="row justify-center">
-            <q-input
+            <QInput
+              v-if="isRecruiters"
               v-model="name"
               class="row-input"
               :counter="name.length > nameMaxLength / 2"
               :maxlength="nameMaxLength"
+              :label="$t( { id: 'asset.recruiters.name_label' })"
               :rules="[
                 name => !!name ||
                   $t({ id: 'form.error.missing_title' })
@@ -452,14 +454,24 @@ export default {
               square
               outlined
               required
-            >
-              <div v-if="isRecruiters" class="q-field__label no-pointer-events absolute ellipsis">
-                {{ $t( { id: 'asset.recruiters.name_label' }) }}
-              </div>
-              <div v-else class="q-field__label no-pointer-events absolute ellipsis">
-                {{ $t({ id: 'asset.name_label' }) }}
-              </div>
-            </q-input>
+            />
+            <QInput
+              v-else
+              v-model="name"
+              class="row-input"
+              :counter="name.length > nameMaxLength / 2"
+              :maxlength="nameMaxLength"
+              :label="$t( { id: 'asset.name_label' })"
+              :rules="[
+                name => !!name ||
+                  $t({ id: 'form.error.missing_title' })
+              ]"
+              debounce="500"
+              autogrow
+              square
+              outlined
+              required
+            />
           </div>
           <div class="q-mt-md row justify-center">
             <SelectAssetType
@@ -500,9 +512,11 @@ export default {
                 />
               </div>
               <div style="flex: 1 2 auto">
-                <q-input
+                <QInput
+                  v-if="isRecruiters"
                   v-model="price"
                   type="number"
+                  :label="$t( { id: 'pricing.recruiters.price_label' })"
                   :rules="[
                     price => Number.isFinite(parseFloat(price)) ||
                       $t({ id: 'form.error.missing_price' })
@@ -510,14 +524,20 @@ export default {
                   required
                   square
                   outlined
-                >
-                  <div v-if="isRecruiters" class="q-field__label no-pointer-events absolute ellipsis">
-                    {{ $t( { id: 'pricing.recruiters.price_label' }) }}
-                  </div>
-                  <div v-else class="q-field__label no-pointer-events absolute ellipsis">
-                    {{ $t({ id: 'pricing.price_label' }) }}
-                  </div>
-                </q-input>
+                />
+                <QInput
+                  v-else
+                  v-model="price"
+                  type="number"
+                  :label="$t({ id: 'pricing.price_label' })"
+                  :rules="[
+                    price => Number.isFinite(parseFloat(price)) ||
+                      $t({ id: 'form.error.missing_price' })
+                  ]"
+                  required
+                  square
+                  outlined
+                />
               </div>
             </div>
           </div>
@@ -551,26 +571,36 @@ export default {
                 />
               </div>
               <div class="col-sm-5">
-                <q-input
+                <QInput
+                  v-if="isRecruiters"
                   v-show="!selectedAssetType.infiniteStock"
                   v-model="quantity"
                   required
                   type="number"
                   min="0"
+                  :label="$t( { id: 'asset.recruiters.quantity_label' })"
                   :rules="[
                     quantity => parseFloat(quantity) > 0 ||
                       $t({ id: 'form.error.missing_field' })
                   ]"
                   square
                   outlined
-                >
-                  <div v-if="isRecruiters" class="q-field__label no-pointer-events absolute ellipsis">
-                    {{ $t( { id: 'asset.recruiters.quantity_label' }) }}
-                  </div>
-                  <div v-else class="q-field__label no-pointer-events absolute ellipsis">
-                    {{ $t({ id: 'asset.quantity_label' }) }}
-                  </div>
-                </q-input>
+                />
+                <QInput
+                  v-else
+                  v-show="!selectedAssetType.infiniteStock"
+                  v-model="quantity"
+                  required
+                  type="number"
+                  min="0"
+                  :label="$t( { id: 'asset.quantity_label' })"
+                  :rules="[
+                    quantity => parseFloat(quantity) > 0 ||
+                      $t({ id: 'form.error.missing_field' })
+                  ]"
+                  square
+                  outlined
+                />
               </div>
             </div>
           </div>

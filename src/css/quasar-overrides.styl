@@ -39,13 +39,25 @@
 .subscription-dialog .q-card
   padding: 16px
   
+.text-subtitle1.recruiters-title
+  @media (max-width $breakpoint-sm-max)
+    font-size: .78rem;
+    line-height: 1rem;
+    
+.recuiters-list
+  @media (max-width $breakpoint-sm-max)
+    margin-left: 0
+  
 .recuiters-list .q-avatar
-  width: 1.5em
-  height: 1.5em
+  width: 1em
+  height: 1em
 
 .recuiters-list .q-avatar .q-avatar__content
-  font-size: 1em
-  line-height: 1em
+  font-size: .7em
+  line-height: .7em
   
-.q-mb-xxl
-  margin-bottom: 74px
+.q-xs-mt-xl,
+.q-xs-mb-xl
+  @media (max-width $breakpoint-sm-max)
+    margin-bottom: 28px
+    margin-top: 28px

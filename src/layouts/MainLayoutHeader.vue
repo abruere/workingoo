@@ -361,6 +361,7 @@ export default {
       <div class="q-mx-md col-md-9">
         <div
           v-show="isRecruiters"
+          :class="{ 'recruiters-title': isRecruiters }"
           class="text-warning text-weight-medium text-center text-uppercase text-subtitle1"
         >
           {{ $t({ id: 'pages.recruiters.tagline' }) }}
