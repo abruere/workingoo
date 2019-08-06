@@ -66,3 +66,13 @@ export function activeAssetTypes (state) {
 
   return assetTypes
 }
+
+export function defaultActiveAssetType (state, getters, rootState, rootGetters) {
+  const {
+    activeAssetTypes,
+  } = rootGetters
+
+  if (activeAssetTypes.length === 1) return activeAssetTypes[0]
+
+  return activeAssetTypes.find(assetType => assetType.isDefault)
+}

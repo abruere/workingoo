@@ -13,7 +13,7 @@
   for = "/*"
   [headers.values]
     # Allowing sameorigin for stelace dashboard content live-editor
-    X-Frame-Options = "SAMEORIGIN"
+    Content-Security-Policy = "frame-ancestors 'self' stelace.com localhost:*"
     X-XSS-Protection = "1; mode=block"
     # Only changing this to "all" on production branch (cf. production context below)
     X-Robots-Tag = "noindex, nofollow"
@@ -45,24 +45,18 @@
 # For "Netlify deploy" template button
 [template.environment]
   STELACE_PUBLISHABLE_API_KEY = "Required: Stelace publishable API key (pubk_test_…)"
-  VUE_APP_SERVICE_NAME = "Service name: injected in various contents"
-  VUE_APP_DEFAULT_LANGUAGE = "Language: currently en (default) or fr"
-  VUE_APP_DEFAULT_CURRENCY = "Currency: ISO code like USD (default) or EUR"
+  VUE_APP_SERVICE_NAME = "Platform name: injected in various contents"
   VUE_APP_MAPBOX_STYLE = "Map tiles provider style URL (we suggest Maptiler)"
-  VUE_APP_MAPBOX_TOKEN = "Map token: not needed if token is included in style URL"
   VUE_APP_NOMINATIM_HOST = "Nominatim API provider like https://open.mapquestapi.com"
-  VUE_APP_NOMINATIM_KEY = "Nominatim provider API key to to enable place search"
+  VUE_APP_NOMINATIM_KEY = "Nominatim provider API key to enable place search"
   VUE_APP_GOOGLE_ANALYTICS_ID = "Google Analytics ID: UA-XXXXXXXX-1"
-  STRIPE_PUBLISH_KEY = "Stripe publishable API key for subscriptions"
-  NEXMO_API_KEY = "Nexmo API key to verify phone numbers"
-  NEXMO_API_SECRET = "Nexmo API secret"
 
 
 # Continuous deployment
 
 [context.production]
-  # Production-specific X-Robots-Tag header
-  command = "sed -i 's/noindex, nofollow/all/g' netlify.toml && yarn build"
+  # Production-specific X-Robots-Tag and Content-Security-Policy headers
+  command = "sed -i 's/noindex, nofollow/all/g; s/localhost:[*]//g' netlify.toml && yarn build"
 
   [context.production.environment]
     VUE_APP_SERVICE_NAME = "Workingoo"
