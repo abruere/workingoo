@@ -39,14 +39,14 @@ pages:
       en: Create your own listing in no time.
       fr: Créez votre propre annonce en quelques instants.
     itemOne:
-      en: 1. Type your ad for free.
-      fr: 1. Saississez votre annonce gratuitement
+      en: Type your ad for free.
+      fr: Saississez votre annonce gratuitement
     itemTwo:
-      en: 2. Create your recruiter account
-      fr: 2. Créez votre compte recruteur
+      en: Create your recruiter account
+      fr: Créez votre compte recruteur
     itemThree:
-      en: 3. Find the right candidates to complete your team
-      fr: 3. Trouvez les bons candidats pour compléter votre équipe
+      en: Find the right candidates to complete your team
+      fr: Trouvez les bons candidats pour compléter votre équipe
     header__EDITOR_LABEL:
       en: Main header of your listing creation page
       fr: En-tête principal de la page création d'annonce

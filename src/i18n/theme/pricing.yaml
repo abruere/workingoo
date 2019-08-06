@@ -34,3 +34,7 @@ pricing:
     fr: >-
       {SERVICE_NAME} est totalement gratuit pour les candidats en recherche de poste !
       Complétez votre profil diffusé à des centaines de recruteurs et candidatez aux offres de votre choix.
+  recruiters:
+    price_label:
+      en: Gross salary
+      fr: Salaire brut

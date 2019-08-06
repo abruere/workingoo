@@ -355,35 +355,50 @@ export default {
       v-slot:heroContentContainer
     >
       <div class="row items-center">
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
           <q-img
             src="statics/images/banner-img.jpg"
           />
         </div>
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
           <q-list
             dense
             number
             padding
-            class="text-left text-white"
+            class="text-white col-12 q-ml-xl recuiters-list"
           >
             <q-item
-              class="q-pa-md text-h5"
+              class="text-h4 q-mt-md q-mb-xxl"
             >
+              <q-item-section avatar>
+                <q-avatar color="warning" text-color="white" class="text-h4">
+                  1
+                </q-avatar>
+              </q-item-section>
               <q-item-section>
                 {{ $t({ id: 'pages.recruiters.itemOne' }) }}
               </q-item-section>
             </q-item>
             <q-item
-              class="q-pa-md text-h5"
+              class="text-h4  q-mt-xl q-mb-xxl"
             >
+              <q-item-section avatar>
+                <q-avatar color="warning" text-color="white">
+                  2
+                </q-avatar>
+              </q-item-section>
               <q-item-section>
                 {{ $t({ id: 'pages.recruiters.itemTwo' }) }}
               </q-item-section>
             </q-item>
             <q-item
-              class="q-pa-md text-h5"
+              class="text-h4  q-mb-md"
             >
+              <q-item-section avatar>
+                <q-avatar color="warning" text-color="white">
+                  3
+                </q-avatar>
+              </q-item-section>
               <q-item-section>
                 {{ $t({ id: 'pages.recruiters.itemThree' }) }}
               </q-item-section>
@@ -423,10 +438,9 @@ export default {
             {{ $t({ id: 'pages.new_asset.form_header' }) }}
           </div>
           <div class="row justify-center">
-            <QInput
+            <q-input
               v-model="name"
               class="row-input"
-              :label="$t({ id: 'asset.name_label' })"
               :counter="name.length > nameMaxLength / 2"
               :maxlength="nameMaxLength"
               :rules="[
@@ -438,7 +452,14 @@ export default {
               square
               outlined
               required
-            />
+            >
+              <div v-if="isRecruiters" class="q-field__label no-pointer-events absolute ellipsis">
+                {{ $t( { id: 'asset.recruiters.name_label' }) }}
+              </div>
+              <div v-else class="q-field__label no-pointer-events absolute ellipsis">
+                {{ $t({ id: 'asset.name_label' }) }}
+              </div>
+            </q-input>
           </div>
           <div class="q-mt-md row justify-center">
             <SelectAssetType
@@ -479,10 +500,9 @@ export default {
                 />
               </div>
               <div style="flex: 1 2 auto">
-                <QInput
+                <q-input
                   v-model="price"
                   type="number"
-                  :label="$t({ id: 'pricing.price_label' })"
                   :rules="[
                     price => Number.isFinite(parseFloat(price)) ||
                       $t({ id: 'form.error.missing_price' })
@@ -490,7 +510,14 @@ export default {
                   required
                   square
                   outlined
-                />
+                >
+                  <div v-if="isRecruiters" class="q-field__label no-pointer-events absolute ellipsis">
+                    {{ $t( { id: 'pricing.recruiters.price_label' }) }}
+                  </div>
+                  <div v-else class="q-field__label no-pointer-events absolute ellipsis">
+                    {{ $t({ id: 'pricing.price_label' }) }}
+                  </div>
+                </q-input>
               </div>
             </div>
           </div>
@@ -524,10 +551,9 @@ export default {
                 />
               </div>
               <div class="col-sm-5">
-                <QInput
+                <q-input
                   v-show="!selectedAssetType.infiniteStock"
                   v-model="quantity"
-                  :label="$t({ id: 'asset.quantity_label' })"
                   required
                   type="number"
                   min="0"
@@ -537,7 +563,14 @@ export default {
                   ]"
                   square
                   outlined
-                />
+                >
+                  <div v-if="isRecruiters" class="q-field__label no-pointer-events absolute ellipsis">
+                    {{ $t( { id: 'asset.recruiters.quantity_label' }) }}
+                  </div>
+                  <div v-else class="q-field__label no-pointer-events absolute ellipsis">
+                    {{ $t({ id: 'asset.quantity_label' }) }}
+                  </div>
+                </q-input>
               </div>
             </div>
           </div>

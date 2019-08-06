@@ -358,10 +358,10 @@ export default {
         </QInput>
       </div>
 
-      <div class="q-mx-md text-weight-medium">
+      <div class="q-mx-md col-md-9">
         <div
           v-show="isRecruiters"
-          class="text-default-color"
+          class="text-warning text-weight-medium text-center text-uppercase text-subtitle1"
         >
           {{ $t({ id: 'pages.recruiters.tagline' }) }}
         </div>
