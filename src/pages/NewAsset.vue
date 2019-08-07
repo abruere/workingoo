@@ -365,7 +365,7 @@ export default {
             dense
             number
             padding
-            class="text-white col-12 q-ml-xl recuiters-list"
+            class="text-white col-12 q-ml-xl recruiters-list"
           >
             <q-item
               class="text-h5 q-mt-md q-mb-xl q-xs-mb-xl q-xs-mt-xl"
@@ -497,7 +497,7 @@ export default {
             class="step-2 q-py-lg"
           >
             <div class="row justify-between">
-              <div class="flex-item--grow-shrink-auto q-pr-lg">
+              <div class="flex-item--grow-shrink-auto q-pr-lg col-md-6 col-12">
                 <SelectCategories
                   :initial-category="selectedCategory"
                   :label="$t({ id: 'asset.category_label' })"
@@ -511,7 +511,7 @@ export default {
                   @change="selectCategory"
                 />
               </div>
-              <div style="flex: 1 2 auto">
+              <div class="col-md-6 col-12" style="flex: 1 2 auto">
                 <QInput
                   v-if="isRecruiters"
                   v-model="price"
@@ -561,7 +561,7 @@ export default {
             />
 
             <div class="row justify-between">
-              <div class="col-sm-5">
+              <div class="col-sm-5 col-12">
                 <PlacesAutocomplete
                   :label="$t({ id: 'places.address_placeholder' })"
                   :initial-query="locationName"
@@ -570,7 +570,7 @@ export default {
                   @selectPlace="selectPlace"
                 />
               </div>
-              <div class="col-sm-5">
+              <div class="col-sm-5 col-12">
                 <QInput
                   v-if="isRecruiters"
                   v-show="!selectedAssetType.infiniteStock"
