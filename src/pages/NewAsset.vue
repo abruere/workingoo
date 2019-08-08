@@ -424,7 +424,10 @@ export default {
               required
             />
           </div>
-          <div v-if="assetTypeRequired" class="q-mt-md row justify-center">
+          <div
+            v-if="assetTypeRequired && activeAssetTypes.length > 1"
+            class="q-mt-md row justify-center"
+          >
             <SelectAssetType
               :initial-asset-type="selectedAssetType"
               :label="$t({ id: 'asset.asset_type_label' })"
