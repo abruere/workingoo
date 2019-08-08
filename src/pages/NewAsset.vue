@@ -427,6 +427,7 @@ export default {
 
     <section class="q-pa-sm">
       <form
+        :class="{ 'recruiters-form': isRecruiters }"
         class="text-center stl-content-container stl-content-container--large margin-h-center q-mb-xl"
         @submit.prevent="createAsset"
       >
@@ -561,7 +562,7 @@ export default {
             />
 
             <div class="row justify-between">
-              <div class="col-sm-5 col-12">
+              <div class="col-sm-5 col-12 q-mb-lg">
                 <PlacesAutocomplete
                   :label="$t({ id: 'places.address_placeholder' })"
                   :initial-query="locationName"
