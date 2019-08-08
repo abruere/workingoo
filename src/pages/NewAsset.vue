@@ -1,5 +1,5 @@
 <script>
-import { get, values, pick } from 'lodash'
+import { compact, flatten, get, groupBy, values, pick } from 'lodash'
 import { mapState, mapGetters } from 'vuex'
 import { date } from 'quasar'
 
@@ -67,6 +67,9 @@ export default {
       const categories = values(this.common.categoriesById)
       return !!categories.length
     },
+    showCategory () { // could depend on some env variable or config
+      return this.categoryRequired
+    },
     assetTypeRequired () {
       const assetTypes = values(this.common.assetTypesById)
       return !!assetTypes.length
@@ -98,6 +101,10 @@ export default {
       const activeNames = this.editableCustomAttributeNames
 
       return values(attrs).filter((ca) => activeNames.includes(ca.name))
+    },
+    customAttributesByType () {
+      const customAttributes = this.customAttributes // ensure Vue reactivity
+      return groupBy(customAttributes, ca => ca.type)
     },
     assetTypes () {
       return values(this.common.assetTypesById)
@@ -187,6 +194,10 @@ export default {
     changeCustomAttributes (customAttributes) {
       this.editingCustomAttributes = customAttributes
     },
+    customAttributesOfTypes (types) {
+      if (!Array.isArray(types)) return []
+      return compact(flatten(types.map(t => this.customAttributesByType[t])))
+    },
     selectAssetType (assetType) {
       this.editingAssetType = assetType
     },
@@ -234,10 +245,11 @@ export default {
           // the logic will be triggered at the end of the upload from afterUploadCompleted
           if (uploadPending) return
 
-          const images = this.assetImages.map(img => {
-            delete img.reused
-            return img
-          })
+          const images = this.assetImages
+          /* .map(img => { // clean reused images
+              delete img.reused
+              return img
+            }) */
 
           let assetQuantity = this.quantity
 
@@ -399,7 +411,6 @@ export default {
     <section class="q-pa-sm">
       <form
         class="text-center stl-content-container stl-content-container--large margin-h-center q-mb-xl"
-        novalidate
         @submit.prevent="createAsset"
       >
         <div class="step-1 q-py-lg">
@@ -422,9 +433,11 @@ export default {
               required
             />
           </div>
-          <div class="q-mt-md row justify-center">
+          <div
+            v-if="assetTypeRequired && activeAssetTypes.length > 1"
+            class="q-mt-md row justify-center"
+          >
             <SelectAssetType
-              v-if="activeAssetTypes.length > 1"
               :initial-asset-type="selectedAssetType"
               :label="$t({ id: 'asset.asset_type_label' })"
               :show-search-icon="false"
@@ -446,8 +459,8 @@ export default {
             v-if="step > 1"
             class="step-2 q-py-lg"
           >
-            <div class="row justify-between">
-              <div class="flex-item--grow-shrink-auto q-pr-lg">
+            <div class="row justify-around">
+              <div v-if="showCategory" class="flex-item--grow-shrink-auto q-pr-lg">
                 <SelectCategories
                   :initial-category="selectedCategory"
                   :label="$t({ id: 'asset.category_label' })"
@@ -461,7 +474,7 @@ export default {
                   @change="selectCategory"
                 />
               </div>
-              <div style="flex: 1 2 auto">
+              <div :style="showCategory ? 'flex: 1 2 auto;' : ''">
                 <QInput
                   v-model="price"
                   type="number"
@@ -494,8 +507,8 @@ export default {
               @changeEndDate="selectEndDate"
             />
 
-            <div class="row justify-between">
-              <div class="col-sm-5">
+            <div class="row justify-around">
+              <div class="col-12 col-sm-5">
                 <PlacesAutocomplete
                   :label="$t({ id: 'places.address_placeholder' })"
                   :initial-query="locationName"
@@ -503,9 +516,11 @@ export default {
                   @selectPlace="selectPlace"
                 />
               </div>
-              <div class="col-sm-5">
+              <div
+                v-show="!selectedAssetType || !selectedAssetType.infiniteStock"
+                class="col-12 col-sm-5"
+              >
                 <QInput
-                  v-show="!selectedAssetType || !selectedAssetType.infiniteStock"
                   v-model="quantity"
                   :label="$t({ id: 'asset.quantity_label' })"
                   required
@@ -527,7 +542,7 @@ export default {
             v-if="step > 3"
             class="step-4 q-py-lg"
           >
-            <div class="row justify-between">
+            <div class="row justify-around">
               <div class="col-12 col-md-7">
                 <QInput
                   v-model="description"
@@ -539,17 +554,46 @@ export default {
                     description => !!description ||
                       $t({ id: 'form.error.missing_description' })
                   ]"
+                  :input-style="customAttributesByType['boolean']
+                    ? `min-height: ${customAttributesByType['boolean'].length * 3}rem;` : ''"
                   type="textarea"
                   required
                 />
               </div>
-              <div class="col-12 col-sm-6 col-md-5 q-pl-md">
+              <div
+                v-if="customAttributesByType['boolean']"
+                class="col-12 col-sm-6 col-md-5 q-pl-md"
+              >
                 <CustomAttributesEditor
-                  :definitions="customAttributes"
+                  :definitions="customAttributesByType['boolean']"
                   :values="editingCustomAttributes"
                   @change="changeCustomAttributes"
                 />
               </div>
+            </div>
+
+            <div class="row q-py-lg justify-around">
+              <CustomAttributesEditor
+                :definitions="customAttributesOfTypes(['text', 'number'])"
+                :values="editingCustomAttributes"
+                class="col-12 col-sm-5"
+                @change="changeCustomAttributes"
+              />
+              <CustomAttributesEditor
+                :definitions="customAttributesByType['select']"
+                :values="editingCustomAttributes"
+                class="col-12 col-sm-5"
+                @change="changeCustomAttributes"
+              />
+            </div>
+
+            <div v-if="customAttributesByType['tags']" class="row q-py-lg justify-around">
+              <CustomAttributesEditor
+                :definitions="customAttributesByType['tags']"
+                :values="editingCustomAttributes"
+                class="col-12 col-sm-10"
+                @change="changeCustomAttributes"
+              />
             </div>
 
             <div class="step-asset-picture q-py-lg">
@@ -560,7 +604,6 @@ export default {
                 field="new_asset.picture_incentive"
               />
               <AppGalleryUploader
-                :reused-images="reusableImages"
                 @uploader-files-changed="uploaderFilesChanged"
                 @upload-completed="uploadCompleted"
                 @remove="removeImage"
