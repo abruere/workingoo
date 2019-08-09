@@ -550,7 +550,7 @@ export default {
           >
             <DateRangePicker
               v-show="showAvailabilityDates"
-              class="q-mb-xl"
+              class="q-mb-lg"
               :start-date="startDate"
               :end-date="endDate"
               :missing-end-date-meaning="$t({ id: 'time.missing_end_date_meaning' })"
@@ -562,7 +562,7 @@ export default {
             />
 
             <div class="row justify-between">
-              <div class="col-sm-5 col-12 q-mb-lg">
+              <div class="col-md-5 col-12 q-mb-lg">
                 <PlacesAutocomplete
                   :label="$t({ id: 'places.address_placeholder' })"
                   :initial-query="locationName"
@@ -571,7 +571,7 @@ export default {
                   @selectPlace="selectPlace"
                 />
               </div>
-              <div class="col-sm-5 col-12">
+              <div class="col-md-5 col-12">
                 <QInput
                   v-if="isRecruiters"
                   v-show="!selectedAssetType.infiniteStock"
