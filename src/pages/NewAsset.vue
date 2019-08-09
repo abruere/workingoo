@@ -520,7 +520,7 @@ export default {
                   :label="$t( { id: 'pricing.recruiters.price_label' })"
                   :rules="[
                     price => Number.isFinite(parseFloat(price)) ||
-                      $t({ id: 'form.error.missing_price' })
+                      $t({ id: 'form.recruiters.error.missing_price' })
                   ]"
                   required
                   square
