@@ -434,7 +434,7 @@ export default {
         <div class="step-1 q-py-lg">
           <div
             v-show="!isRecruiters"
-            class="text-h5"
+            class="text-h5 q-pb-lg"
           >
             {{ $t({ id: 'pages.new_asset.form_header' }) }}
           </div>
