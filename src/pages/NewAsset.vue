@@ -517,7 +517,7 @@ export default {
                   @change="selectCategory"
                 />
               </div>
-              <div class="col-md-6 col-12"  :style="showCategory ? 'flex: 1 2 auto;' : ''">
+              <div class="col-md-6 col-12" :style="showCategory ? 'flex: 1 2 auto;' : ''">
                 <QInput
                   v-if="isRecruiters"
                   v-model="price"
@@ -578,9 +578,6 @@ export default {
               </div>
               <div class="col-md-5 col-12">
                 <QInput
-                
-                
-               
                   v-if="isRecruiters"
                   v-show="!selectedAssetType || !selectedAssetType.infiniteStock"
                   v-model="quantity"
