@@ -27,7 +27,6 @@ module.exports = function (ctx) {
   })
 
   // Ensuring we have local translations up-to-date. Runs once.
-  // TODO: allow to distinguish between live and test environments in buildTranslationFiles.js
   execSync(ctx.dev ? 'npm run translate' : 'npm run translate:prod', { stdio: 'inherit' })
 
   // ///////// //
@@ -101,6 +100,12 @@ module.exports = function (ctx) {
   const cdnUploadUrl = process.env.VUE_APP_CDN_POLICY_ENDPOINT ||
     'https://upload.instant.stelace.com/upload/policy'
   const cdnS3Bucket = process.env.VUE_APP_CDN_S3_BUCKET || 'stelace-instant-files'
+
+  const postMessageAllowedOrigins = process.env.VUE_APP_POST_MESSAGE_ALLOWED_ORIGINS ||
+    'https://stelace.com'
+
+  const phoneApiEnabled = Boolean(process.env.NEXMO_API_KEY && process.env.NEXMO_API_SECRET)
+  const taxNumberApiEnabled = Boolean(process.env.VATSENSE_API_KEY)
 
   // ///////////// //
   // Quasar config //
@@ -452,6 +457,7 @@ module.exports = function (ctx) {
         VUE_APP_MAPBOX_TOKEN: JSON.stringify(process.env.VUE_APP_MAPBOX_TOKEN),
         VUE_APP_DISABLE_AUTO_SEARCH_ON_MAP_MOVE: JSON.stringify(process.env.VUE_APP_DISABLE_AUTO_SEARCH_ON_MAP_MOVE),
         VUE_APP_DEFAULT_LANGUAGE: JSON.stringify(process.env.VUE_APP_DEFAULT_LANGUAGE),
+        VUE_APP_LOCALE_SWITCH: JSON.stringify(process.env.VUE_APP_LOCALE_SWITCH),
         VUE_APP_DEFAULT_CURRENCY: JSON.stringify(process.env.VUE_APP_DEFAULT_CURRENCY),
         VUE_APP_DEBUG_STYLES: JSON.stringify(process.env.VUE_APP_DEBUG_STYLES),
         VUE_APP_USE_PROD_FONTS_CSS: JSON.stringify(process.env.VUE_APP_USE_PROD_FONTS_CSS),
@@ -469,6 +475,9 @@ module.exports = function (ctx) {
         VUE_APP_CDN_UPLOAD_PREFIX: JSON.stringify(process.env.VUE_APP_CDN_UPLOAD_PREFIX),
         VUE_APP_SEARCH_BY_CATEGORY: JSON.stringify(process.env.VUE_APP_SEARCH_BY_CATEGORY),
         VUE_APP_INSTANT_PAGE_PREFIX: JSON.stringify('/l'),
+        VUE_APP_POST_MESSAGE_ALLOWED_ORIGINS: JSON.stringify(postMessageAllowedOrigins),
+        VUE_APP_PHONE_API_ENABLED: JSON.stringify(phoneApiEnabled),
+        VUE_APP_TAX_NUMBER_API_ENABLED: JSON.stringify(taxNumberApiEnabled),
       }
     },
 

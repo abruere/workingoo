@@ -59,36 +59,29 @@ export default {
       return this.route.name === 'recruiters'
     },
     defaultAssetType () {
-      const assetTypesConfig = get(this.common.config, 'stelace.instant.assetTypes')
-      if (!assetTypesConfig) return this.assetTypes[0]
-
-      let defaultType
-
-      const assetTypesIds = Object.keys(assetTypesConfig)
-      assetTypesIds.forEach(assetTypeId => {
-        if (defaultType) return
-
-        const assetTypeConfig = assetTypesConfig[assetTypeId]
-        if (assetTypeConfig.isDefault) {
-          defaultType = this.assetTypes.find(assetType => assetType.id === assetTypeId)
-        }
-      })
-
-      if (defaultType) return defaultType
-      else return this.assetTypes[0]
+      return this.defaultActiveAssetType
     },
     isAssetTypeReadonly () {
       return !!this.asset.asset.id
     },
+    categoryRequired () {
+      const categories = values(this.common.categoriesById)
+      return !!categories.length
+    },
+    showCategory () { // could depend on some env variable or config
+      return this.categoryRequired
+    },
+    assetTypeRequired () {
+      const assetTypes = values(this.common.assetTypesById)
+      return !!assetTypes.length
+    },
     selectedAssetType () {
       if (!this.asset.asset.id) {
         if (this.editingAssetType) return this.editingAssetType
-        else {
-          if (this.assetTypes.length === 1) return this.assetTypes[0]
-          else return this.assetTypes.find(assetType => assetType.id === this.defaultAssetType.id) || null
-        }
+        else if (this.defaultAssetType) return this.defaultAssetType
+        else return null
       } else {
-        return this.common.assetTypesById[this.asset.asset.assetTypeId] || {}
+        return this.common.assetTypesById[this.asset.asset.assetTypeId] || null
       }
     },
     editableCustomAttributeNames () {
@@ -122,6 +115,13 @@ export default {
       const locations = this.locations
       return get(locations, '[0].shortDisplayName', '')
     },
+    priceLabel () {
+      const defaultPriceLabel = this.$t({ id: 'pricing.price_label' })
+      if (!this.selectedAssetType || !this.selectedAssetType.timeBased) return defaultPriceLabel
+
+      const timeUnit = get(this.selectedAssetType, 'timing.timeUnit')
+      return this.$t({ id: 'pricing.price_per_time_unit_label' }, { timeUnit })
+    },
     reusableImages () {
       return this.currentUser.id ? this.currentUser.images : []
     },
@@ -136,6 +136,7 @@ export default {
       'currentUser',
       'canPublishAsset',
       'activeAssetTypes',
+      'defaultActiveAssetType',
     ]),
   },
   async preFetch ({ store }) {
@@ -234,10 +235,10 @@ export default {
           const attrs = {
             // autogrow on name QInput makes it a textarea, with possible line returns
             name: this.name.replace('\n', ''),
-            assetTypeId: this.selectedAssetType.id,
+            assetTypeId: (this.selectedAssetType && this.selectedAssetType.id) || undefined, // `null` not allowed
             description: this.description,
             price: this.price,
-            quantity: this.selectedAssetType.infiniteStock ? 1 : assetQuantity,
+            quantity: this.selectedAssetType ? (this.selectedAssetType.infiniteStock ? 1 : assetQuantity) : 1,
             locations: this.locations,
             categoryId: this.selectedCategory ? this.selectedCategory.id : null,
             customAttributes: pick(this.editingCustomAttributes, this.editableCustomAttributeNames),
@@ -474,15 +475,18 @@ export default {
               required
             />
           </div>
-          <div class="q-mt-md row justify-center">
+          <div
+            v-if="assetTypeRequired && activeAssetTypes.length > 1"
+            class="q-mt-md row justify-center"
+          >
             <SelectAssetType
-              v-if="activeAssetTypes.length > 1"
               :initial-asset-type="selectedAssetType"
               :label="$t({ id: 'asset.asset_type_label' })"
               :show-search-icon="false"
               :rules="[
-                selectedAssetType => !!selectedAssetType ||
-                  $t({ id: 'form.error.missing_field' })
+                selectedAssetType => assetTypeRequired
+                  ? (!!selectedAssetType || $t({ id: 'form.error.missing_field' }))
+                  : true
               ]"
               class="row-input -small"
               :readonly="isAssetTypeReadonly"
@@ -497,22 +501,23 @@ export default {
           <div
             class="step-2 q-py-lg"
           >
-            <div class="row justify-between">
+            <div v-if="showCategory" class="row justify-around">
               <div class="flex-item--grow-shrink-auto q-pr-lg col-md-6 col-12">
                 <SelectCategories
                   :initial-category="selectedCategory"
                   :label="$t({ id: 'asset.category_label' })"
                   :show-search-icon="false"
                   :rules="[
-                    selectedCategory => !!selectedCategory ||
-                      $t({ id: 'form.error.missing_field' })
+                    selectedCategory => categoryRequired
+                      ? (!!selectedCategory || $t({ id: 'form.error.missing_field' }))
+                      : true
                   ]"
                   square
                   outlined
                   @change="selectCategory"
                 />
               </div>
-              <div class="col-md-6 col-12" style="flex: 1 2 auto">
+              <div class="col-md-6 col-12"  :style="showCategory ? 'flex: 1 2 auto;' : ''">
                 <QInput
                   v-if="isRecruiters"
                   v-model="price"
@@ -530,7 +535,7 @@ export default {
                   v-else
                   v-model="price"
                   type="number"
-                  :label="$t({ id: 'pricing.price_label' })"
+                  :label="priceLabel"
                   :rules="[
                     price => Number.isFinite(parseFloat(price)) ||
                       $t({ id: 'form.error.missing_price' })
@@ -573,8 +578,11 @@ export default {
               </div>
               <div class="col-md-5 col-12">
                 <QInput
+                
+                
+               
                   v-if="isRecruiters"
-                  v-show="!selectedAssetType.infiniteStock"
+                  v-show="!selectedAssetType || !selectedAssetType.infiniteStock"
                   v-model="quantity"
                   required
                   type="number"
