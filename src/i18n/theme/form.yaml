@@ -23,3 +23,8 @@ form:
     missing_price:
       en: Wage required
       fr: Salaire brut requis
+  recruiters:
+    error:
+      missing_price:
+        en: Net salary required
+        fr: Salaire net requis

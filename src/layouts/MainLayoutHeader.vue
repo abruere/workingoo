@@ -44,6 +44,9 @@ export default {
     isSearch () {
       return this.route.name === 'search'
     },
+    isRecruiters () {
+      return this.route.name === 'recruiters'
+    },
     selectedCategory () {
       const selectedCategoryId = this.search.searchFilters.filters.categoryId
       if (!selectedCategoryId) return null
@@ -276,11 +279,11 @@ export default {
         flat
         @click="toggleMenu"
       >
-        <AppMiniLogo class="company-mini-logo xs" />
+        <AppMiniLogo class="company-mini-logo current-color xs" />
       </QBtn>
 
       <div
-        v-show="!isHome && !isMenuOpened"
+        v-show="!isHome && !isMenuOpened && !isRecruiters"
         class="header__search-bar row no-wrap shadow-2 q-px-sm"
       >
         <QInput
@@ -360,6 +363,15 @@ export default {
         </QInput>
       </div>
 
+      <div v-show="isRecruiters" class="q-mx-md col-md-9">
+        <div
+          :class="{ 'recruiters-title': isRecruiters }"
+          class="text-warning text-weight-medium text-center text-uppercase text-subtitle1"
+        >
+          {{ $t({ id: 'pages.recruiters.tagline' }) }}
+        </div>
+      </div>
+
       <QSpace />
 
       <QBtn
@@ -383,7 +395,7 @@ export default {
       </QBtn>
 
       <QBtn
-        v-show="!currentUser.id"
+        v-show="!currentUser.id && !isRecruiters"
         flat
         no-caps
         :class="[
@@ -403,6 +415,7 @@ export default {
 
       <AccessComponent action="viewCreateAssetCta">
         <QBtn
+          v-show="!isRecruiters"
           class="create-assset-button q-px-md flex-item--auto"
           :to="{ name: 'newAsset' }"
           :loading="content.fetchingContentStatus"

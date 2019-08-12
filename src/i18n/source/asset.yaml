@@ -159,3 +159,10 @@ asset:
     contacts:
       en: "{contacts, plural, =0 {No contact} one {One contact} other {# contacts}} for this listing."
       fr: "{contacts, plural, =0 {Aucun contact} one {Un contact} other {# contacts}} pour cette annonce."
+  recruiters:
+    name_label:
+      en: Ad title
+      fr: Titre annonce
+    quantity_label:
+      en: Number of jobs to be filled
+      fr: Nombre de postes à pourvoir
