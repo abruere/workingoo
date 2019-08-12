@@ -591,9 +591,9 @@ module.exports = {
   },
   users: {
     company1: {
-      username: `jobs-marketplace-test-premium1@example.com`,
-      password: 'jobs-marketplace-test-premium1@example.com',
-      email: 'jobs-marketplace-test-premium1@example.com',
+      username: `marketplace-test-provider-premium1@example.com`,
+      password: 'marketplace-test-provider-premium1@example.com',
+      email: 'marketplace-test-provider-premium1@example.com',
       displayName: 'Company 1',
       roles: ['provider', 'premium'],
       metadata: {
@@ -620,9 +620,9 @@ module.exports = {
       }
     },
     company2: {
-      username: `jobs-marketplace-test-recruteur2@example.com`,
-      password: 'jobs-marketplace-test-recruteur2@example.com',
-      email: `jobs-marketplace-test-recruteur2@example.com`,
+      username: `marketplace-test-provider2@example.com`,
+      password: 'marketplace-test-provider2@example.com',
+      email: `marketplace-test-provider2@example.com`,
       displayName: 'Company 2',
       roles: ['provider'],
       metadata: {
@@ -632,9 +632,9 @@ module.exports = {
       }
     },
     company3: {
-      username: `jobs-marketplace-test-recruteur3@example.com`,
-      password: 'jobs-marketplace-test-recruteur3@example.com',
-      email: 'jobs-marketplace-test-recruteur3@example.com',
+      username: `marketplace-test-provider3@example.com`,
+      password: 'marketplace-test-provider3@example.com',
+      email: 'marketplace-test-provider3@example.com',
       displayName: 'Company 3',
       roles: ['provider'],
       metadata: {
@@ -644,9 +644,9 @@ module.exports = {
       }
     },
     company4: {
-      username: `jobs-marketplace-test-recruteur4@example.com`,
-      password: 'jobs-marketplace-test-recruteur4@example.com',
-      email: 'jobs-marketplace-test-recruteur4@example.com',
+      username: `marketplace-test-provider4@example.com`,
+      password: 'marketplace-test-provider4@example.com',
+      email: 'marketplace-test-provider4@example.com',
       displayName: 'Company 4',
       roles: ['provider'],
       metadata: {
@@ -656,9 +656,9 @@ module.exports = {
       }
     },
     applicant1: {
-      username: `jobs-marketplace-test-candidat1@example.com`,
-      password: `jobs-marketplace-test-candidat1@example.com`,
-      email: `jobs-marketplace-test-candidat1@example.com`,
+      username: `marketplace-test-user1@example.com`,
+      password: `marketplace-test-user1@example.com`,
+      email: `marketplace-test-user1@example.com`,
       displayName: 'Jordan',
       firstname: 'Jordan',
       lastname: 'Rossignol',
@@ -684,9 +684,9 @@ module.exports = {
       }
     },
     applicant2: {
-      username: `jobs-marketplace-test-candidat2@example.com`,
-      password: `jobs-marketplace-test-candidat2@example.com`,
-      email: `jobs-marketplace-test-candidat2@example.com`,
+      username: `marketplace-test-user2@example.com`,
+      password: `marketplace-test-user2@example.com`,
+      email: `marketplace-test-user2@example.com`,
       displayName: 'Sophie',
       firstname: 'Sophie',
       lastname: 'Bleue',
@@ -712,9 +712,9 @@ module.exports = {
       }
     },
     applicant3: {
-      username: `jobs-marketplace-test-candidat3@example.com`,
-      password: `jobs-marketplace-test-candidat3@example.com`,
-      email: `jobs-marketplace-test-candidat3@example.com`,
+      username: `marketplace-test-user3@example.com`,
+      password: `marketplace-test-user3@example.com`,
+      email: `marketplace-test-user3@example.com`,
       displayName: 'Cyril',
       firstname: 'Cyril',
       lastname: 'Petit',
@@ -1135,9 +1135,9 @@ module.exports = {
       ]
     },
 
-    sendEmailToTakerWhenTransactionAcceptedByOwner: {
-      name: '[Email] Accepted transaction to taker',
-      description: 'Send an email to taker when a transaction is accepted by owner',
+    sendEmailToTakerWhenTransactionStatusChanged: {
+      name: '[Email] Transaction update to taker',
+      description: 'Send an email to taker when a transaction is accepted or refused by owner',
       event: 'transaction__status_changed',
       computed: {
         // fallback to empty strings for email content
@@ -1148,11 +1148,10 @@ module.exports = {
       },
       run: [
         {
+          name: 'acceptedByOwnerEmail',
           endpointMethod: 'POST',
-          stop: `
-            !computed.toEmail ||
-            transaction.status !== "accepted"
-          `,
+          stop: '!computed.toEmail',
+          skip: 'transaction.status !== "accepted"',
           endpointUri: '/emails/send-template',
           endpointPayload: {
             name: '"transactionAcceptedByOwnerToTaker"',
@@ -1164,26 +1163,11 @@ module.exports = {
             toEmail: 'computed.toEmail',
             toName: 'computed.toName'
           }
-        }
-      ]
-    },
-
-    sendEmailToTakerWhenTransactionRefusedByOwner: {
-      name: '[Email] Refused transaction to taker',
-      description: 'Send email to taker when transaction is refused by owner',
-      event: 'transaction__status_changed',
-      computed: {
-        // fallback to empty strings for email content
-        organizationName: 'owner.displayName || ""',
-        assetName: '_.get(transaction, "assetSnapshot.name", "")',
-        toName: 'taker.displayName || ""',
-        toEmail: 'taker.email'
-      },
-      run: [
+        },
         {
+          name: 'refusedByOwnerEmail',
           endpointMethod: 'POST',
-          stop: `
-            !computed.toEmail ||
+          skip: `
             transaction.status !== "cancelled" ||
             transaction.cancellationReason !== "refusedByOwner"
           `,
@@ -1202,21 +1186,26 @@ module.exports = {
       ]
     },
 
-    sendEmailToOwnerWhenTransactionAcceptedByTaker: {
-      name: '[Email] Accepted transaction to owner',
-      description: 'Send email to owner when transaction is accepted by taker',
+    sendEmailToOwnerWhenTransactionStatusChanged: {
+      name: '[Email] Transaction update to owner',
+      description: 'Send email to owner when transaction is accepted or refused by taker',
       event: 'transaction__status_changed',
+      context: ['stelace'],
       computed: {
         // fallback to empty strings for email content
+        transactionId: 'transaction.id',
         takerDisplayName: 'taker.displayName || ""',
         assetName: '_.get(transaction, "assetSnapshot.name", "")',
         toName: 'owner.displayName || ""',
         toEmail: 'owner.email'
       },
       run: [
+        // accepted
         {
+          name: 'acceptedByTakerEmail',
           endpointMethod: 'POST',
-          stop: '!computed.toEmail || transaction.status !== "validated"',
+          stop: '!computed.toEmail',
+          skip: 'transaction.status !== "validated"',
           endpointUri: '/emails/send-template',
           endpointPayload: {
             name: '"transactionAcceptedByTakerToOwner"',
@@ -1228,28 +1217,11 @@ module.exports = {
             toEmail: 'computed.toEmail',
             toName: 'computed.toName'
           }
-        }
-      ]
-    },
-
-    sendEmailToOwnerWhenTransactionRefusedByTaker: {
-      name: '[Email] Refused transaction to owner',
-      description: 'Send email to owner when transaction is refused by taker',
-      event: 'transaction__status_changed',
-      context: ['stelace'],
-      computed: {
-        // fallback to empty strings for email content
-        transactionId: 'transaction.id',
-        takerDisplayName: 'taker.displayName || ""',
-        assetName: '_.get(transaction, "assetSnapshot.name", "")',
-        toName: 'taker.displayName || ""',
-        toEmail: 'taker.email'
-      },
-      run: [
+        },
+        // refused
         {
           name: 'messages',
           stop: `
-            !computed.toEmail ||
             transaction.status !== "cancelled" ||
             !["refusedByTaker", "withdrawn"].includes(transaction.cancellationReason)
           `,
@@ -1257,6 +1229,7 @@ module.exports = {
           endpointUri: '/messages?topicId=${computed.transactionId}',
         },
         {
+          name: 'refusedByTakerEmail',
           stop: '!responses.messages.results.length',
           endpointMethod: 'POST',
           computed: {
