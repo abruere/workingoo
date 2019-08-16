@@ -4,7 +4,6 @@ import { mapState, mapGetters } from 'vuex'
 import { date } from 'quasar'
 
 import EventBus from 'src/utils/event-bus'
-import { isValidDateString } from 'src/utils/time'
 import { extractLocationDataFromPlace } from 'src/utils/places'
 import logger from 'src/utils/logger'
 
@@ -123,41 +122,6 @@ export default {
       const timeUnit = get(this.selectedAssetType, 'timing.timeUnit')
       return this.$t({ id: 'pricing.price_per_time_unit_label' }, { timeUnit })
     },
-    step () {
-      const steps = [
-        true, // fictive step 0
-        true,
-        false,
-        false,
-        false,
-      ]
-
-      if (this.name.length >= 1) { // with high debounce to reduce distraction while typing
-        steps[2] = true
-      }
-
-      const validCategory = this.selectedCategory && this.selectedCategory.name
-      if ((!this.categoryRequired || validCategory) && !isNaN(parseInt(this.price))) {
-        steps[3] = true
-      }
-
-      let isValidStartDate = true
-      let isValidEndDate = true
-      if (this.startDate) {
-        isValidStartDate = isValidDateString(this.startDate)
-      }
-      if (this.endDate) {
-        isValidEndDate = isValidDateString(this.endDate)
-      }
-
-      if (!this.showAvailabilityDates || (this.showAvailabilityDates && this.startDate && isValidStartDate && isValidEndDate)) {
-        // endDate is optional, so is quantity
-        steps[4] = true
-      }
-
-      // Index of first falsy step
-      return steps.indexOf(false) >= 0 ? steps.indexOf(false) - 1 : steps.length - 1
-    },
     reusableImages () {
       return this.currentUser.id ? this.currentUser.images : []
     },
@@ -231,129 +195,127 @@ export default {
       // prevents unauthorized users from creating asset after authentication
       if (!this.checkAccessOrRedirect('createAsset')) return
 
-      if (this.step > 3) {
-        try {
-          const uploadPending = this.uploaderFiles.length && this.assetImages.length < this.uploaderFiles.length
-          this.creatingAsset = true
+      try {
+        const uploadPending = this.uploaderFiles.length && this.assetImages.length < this.uploaderFiles.length
+        this.creatingAsset = true
 
-          // if upload is processing, do not perform the asset creation logic right now
-          // the logic will be triggered at the end of the upload from afterUploadCompleted
-          if (uploadPending) return
+        // if upload is processing, do not perform the asset creation logic right now
+        // the logic will be triggered at the end of the upload from afterUploadCompleted
+        if (uploadPending) return
 
-          const images = this.assetImages.map(img => {
-            delete img.reused
-            return img
-          })
+        const images = this.assetImages.map(img => {
+          delete img.reused
+          return img
+        })
 
-          let assetQuantity = this.quantity
+        let assetQuantity = this.quantity
 
-          const shouldCreateAvailability = this.showAvailabilityDates && this.startDate
+        const shouldCreateAvailability = this.showAvailabilityDates && this.startDate
 
-          const availabilityAttrs = {}
+        const availabilityAttrs = {}
 
-          if (shouldCreateAvailability) {
-            const isAnUnavailability = !this.endDate
+        if (shouldCreateAvailability) {
+          const isAnUnavailability = !this.endDate
 
-            if (!isAnUnavailability) {
-              availabilityAttrs.startDate = this.startDate
-              availabilityAttrs.endDate = this.endDate
-              availabilityAttrs.quantity = this.quantity
+          if (!isAnUnavailability) {
+            availabilityAttrs.startDate = this.startDate
+            availabilityAttrs.endDate = this.endDate
+            availabilityAttrs.quantity = this.quantity
 
-              // we want the asset to be available only during the availability period
-              assetQuantity = 0
-            } else {
-              availabilityAttrs.startDate = date.addToDate(new Date(), { year: -1 }).toISOString()
-              availabilityAttrs.endDate = this.startDate
-              availabilityAttrs.quantity = 0
-            }
+            // we want the asset to be available only during the availability period
+            assetQuantity = 0
+          } else {
+            availabilityAttrs.startDate = date.addToDate(new Date(), { year: -1 }).toISOString()
+            availabilityAttrs.endDate = this.startDate
+            availabilityAttrs.quantity = 0
           }
-
-          const attrs = {
-            // autogrow on name QInput makes it a textarea, with possible line returns
-            name: this.name.replace('\n', ''),
-            assetTypeId: (this.selectedAssetType && this.selectedAssetType.id) || undefined, // `null` not allowed
-            description: this.description,
-            price: this.price,
-            quantity: this.selectedAssetType ? (this.selectedAssetType.infiniteStock ? 1 : assetQuantity) : 1,
-            locations: this.locations,
-            categoryId: this.selectedCategory ? this.selectedCategory.id : null,
-            customAttributes: pick(this.editingCustomAttributes, this.editableCustomAttributeNames),
-            active: true,
-            validated: this.canPublishAsset,
-            metadata: {
-              images,
-              // Save dates to create custom availabilities with Workflows
-              startDate: this.startDate,
-              endDate: this.endDate
-            }
-          }
-
-          if (this.content.currency) {
-            attrs.currency = this.content.currency
-          }
-
-          const asset = await this.$store.dispatch('createAsset', { attrs })
-
-          if (shouldCreateAvailability) {
-            availabilityAttrs.assetId = asset.id
-            await this.$store.dispatch('createAvailability', { attrs: availabilityAttrs })
-          }
-
-          this.notifySuccess('notification.saved')
-          // this.resetForm() // useful when not keeping the user on the current page
-
-          const updateUserImages = !!this.newUserImages.length
-          const updateUserLocations = !!(!this.currentUser.locations.length && asset.locations.length)
-          const needUpdateUser = updateUserImages || updateUserLocations
-
-          if (needUpdateUser) {
-            const attrs = {}
-
-            if (updateUserImages) {
-              const currentUserImages = this.currentUser.images.map(img => img.name)
-              // Ensuring we create no duplicate if user has logged in after uploading existing images
-              const dedup = this.newUserImages.filter(img => !currentUserImages.includes(img.name))
-
-              attrs.images = this.currentUser.images.concat(dedup)
-            }
-            if (updateUserLocations) {
-              attrs.locations = [asset.locations[0]]
-            }
-
-            try { // not awaiting this since it’s not critical
-              this.$store.dispatch('updateUser', {
-                userId: this.currentUser.id,
-                attrs
-              })
-            } catch (e) {
-              logger(e)
-            }
-          }
-
-          this.creatingAsset = false
-
-          // Show that the asset is ready…
-          this.$router.push({ name: 'asset', params: { id: asset.id } })
-
-          // …and prompt to validate account if needed
-          if (!this.canPublishAsset) {
-            this.$q.dialog({
-              title: this.$t({ id: 'user.account.validation_header' }),
-              message: this.$t({ id: 'user.account.validation_required_message' }),
-              ok: {
-                label: this.$t({ id: 'prompt.validate' }),
-                color: 'positive',
-                class: 'q-ma-sm'
-              }
-            }).onOk(() => {
-              this.$router.push({ name: 'publicProfile', params: { id: this.currentUser.id } })
-            })
-          }
-        } catch (err) {
-          this.creatingAsset = false
-
-          this.notifyWarning('error.unknown_happened_header')
         }
+
+        const attrs = {
+          // autogrow on name QInput makes it a textarea, with possible line returns
+          name: this.name.replace('\n', ''),
+          assetTypeId: (this.selectedAssetType && this.selectedAssetType.id) || undefined, // `null` not allowed
+          description: this.description,
+          price: this.price,
+          quantity: this.selectedAssetType ? (this.selectedAssetType.infiniteStock ? 1 : assetQuantity) : 1,
+          locations: this.locations,
+          categoryId: this.selectedCategory ? this.selectedCategory.id : null,
+          customAttributes: pick(this.editingCustomAttributes, this.editableCustomAttributeNames),
+          active: true,
+          validated: this.canPublishAsset,
+          metadata: {
+            images,
+            // Save dates to create custom availabilities with Workflows
+            startDate: this.startDate,
+            endDate: this.endDate
+          }
+        }
+
+        if (this.content.currency) {
+          attrs.currency = this.content.currency
+        }
+
+        const asset = await this.$store.dispatch('createAsset', { attrs })
+
+        if (shouldCreateAvailability) {
+          availabilityAttrs.assetId = asset.id
+          await this.$store.dispatch('createAvailability', { attrs: availabilityAttrs })
+        }
+
+        this.notifySuccess('notification.saved')
+        // this.resetForm() // useful when not keeping the user on the current page
+
+        const updateUserImages = !!this.newUserImages.length
+        const updateUserLocations = !!(!this.currentUser.locations.length && asset.locations.length)
+        const needUpdateUser = updateUserImages || updateUserLocations
+
+        if (needUpdateUser) {
+          const attrs = {}
+
+          if (updateUserImages) {
+            const currentUserImages = this.currentUser.images.map(img => img.name)
+            // Ensuring we create no duplicate if user has logged in after uploading existing images
+            const dedup = this.newUserImages.filter(img => !currentUserImages.includes(img.name))
+
+            attrs.images = this.currentUser.images.concat(dedup)
+          }
+          if (updateUserLocations) {
+            attrs.locations = [asset.locations[0]]
+          }
+
+          try { // not awaiting this since it’s not critical
+            this.$store.dispatch('updateUser', {
+              userId: this.currentUser.id,
+              attrs
+            })
+          } catch (e) {
+            logger(e)
+          }
+        }
+
+        this.creatingAsset = false
+
+        // Show that the asset is ready…
+        this.$router.push({ name: 'asset', params: { id: asset.id } })
+
+        // …and prompt to validate account if needed
+        if (!this.canPublishAsset) {
+          this.$q.dialog({
+            title: this.$t({ id: 'user.account.validation_header' }),
+            message: this.$t({ id: 'user.account.validation_required_message' }),
+            ok: {
+              label: this.$t({ id: 'prompt.validate' }),
+              color: 'positive',
+              class: 'q-ma-sm'
+            }
+          }).onOk(() => {
+            this.$router.push({ name: 'publicProfile', params: { id: this.currentUser.id } })
+          })
+        }
+      } catch (err) {
+        this.creatingAsset = false
+
+        this.notifyWarning('error.unknown_happened_header')
       }
     },
     /* resetForm () {
