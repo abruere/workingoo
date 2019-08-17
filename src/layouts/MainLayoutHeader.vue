@@ -417,7 +417,7 @@ export default {
         <QBtn
           v-show="!isRecruiters"
           class="create-assset-button q-px-md flex-item--auto"
-          :to="{ name: 'newAsset' }"
+          :to="{ name: 'recruiters' }"
           :loading="content.fetchingContentStatus"
           :rounded="style.roundedTheme"
           :label="$t({ id: 'navigation.new_listing' })"
