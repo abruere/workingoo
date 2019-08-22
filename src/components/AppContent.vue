@@ -46,18 +46,19 @@ export default {
       return this.content.contentEditing
     },
     renderAsHTML () {
-      return this.isTransformedContent(this.contentKey) === 'markdown'
+      return this.getContentTransformType(this.contentKey) === 'markdown'
     },
     ...mapState([
       'content',
     ]),
     ...mapGetters([
-      'isTransformedContent'
+      'getContentTransformType',
+      'getRawContent',
     ])
   },
   methods: {
     onClick (event) {
-      // click event should not be propagated if content edition is enabled
+      // click event should not be propagated if content editing is enabled
       if (!this.contentEditing) return
       if (event) {
         event.stopPropagation()
@@ -67,10 +68,15 @@ export default {
       this.selectEntry()
     },
     selectEntry () {
+      const rawValue = this.getRawContent(this.contentKey)
+
       const payload = {
         type: 'stelaceContentSelected',
         entry: this.entry,
         field: this.field,
+        value: this.value,
+        rawValue: rawValue,
+        transform: this.getContentTransformType(this.contentKey)
       }
 
       if (isPlainObject(this.options) && !isEmpty(this.options)) {
@@ -101,7 +107,7 @@ export default {
   -->
   <!-- eslint-disable vue/no-v-html -->
   <!--
-    Remove all listeners if content edition is enabled
+    Remove all listeners if content editing is enabled
     to prevent navigation when selecting an AppContent component
   -->
   <div
@@ -111,18 +117,14 @@ export default {
       'stl-content-entry',
       contentEditing ? 'editable' : ''
     ]"
-    :stl-content-entry="entry"
-    :stl-content-field="field"
+    :stl-content-entry="contentEditing ? entry : false"
+    :stl-content-field="contentEditing ? field : false"
     v-bind="$attrs"
     @click="onClick($event)"
     v-on="contentEditing ? null : $listeners"
     v-html="value"
   />
   <!-- eslint-enable vue/no-v-html -->
-  <!--
-    TODO: insert stl-content-x attributes only when needed to avoid bloating template
-          like when receiving an instruction from dashboard editor (postMessage)
-  -->
   <component
     :is="tag"
     v-else
@@ -130,8 +132,8 @@ export default {
       'stl-content-entry',
       contentEditing ? 'editable' : ''
     ]"
-    :stl-content-entry="entry"
-    :stl-content-field="field"
+    :stl-content-entry="contentEditing ? entry : false"
+    :stl-content-field="contentEditing ? field : false"
     v-bind="$attrs"
     @click="onClick($event)"
     v-on="contentEditing ? null : $listeners"
