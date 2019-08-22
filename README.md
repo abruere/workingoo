@@ -122,25 +122,21 @@ yarn seed
 
 ## Deployment
 
-We’ve set up continuous deployment for you with Netlify.
-
-You just have to click "_Deploy to netlify_" above and follow the instructions to deploy.
-
-Please refer to [deployment docs section](./docs/deployment.md) for more details or alternatives.
+We’ve set up continuous deployment with Netlify.
 
 ### Branches for continuous deployment
 
 - `dev` for development and _test_ environment, including pending PRs deployed to [Netlify preview subdomains](
   https://www.netlify.com/docs/continuous-deployment/#branches-deploys)
 - `workingoo` for _live_ environment, automatically deployed after any commit on this branch
-- `master` is used to pull changes from `upstream/master`, and must be kept in exact sync with no local change.
+- __`master` is used to pull changes from `upstream/jobs`__, and must be kept in exact sync with no local change.
 
 Usual sequence of commands:
 
 ```sh
 git checkout master
 git fetch upstream
-git merge upstream/master
+git merge upstream/jobs
 git checkout dev
 # Resolve any conflict
 git merge master
