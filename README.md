@@ -7,16 +7,14 @@
 - Live [![Netlify Status](https://api.netlify.com/api/v1/badges/5f94a520-42b2-47b6-9c69-c9797b02bd15/deploy-status)](https://app.netlify.com/sites/stelace-instant-workingoo/deploys)
 - Test  [![Netlify Status](https://api.netlify.com/api/v1/badges/117d635e-a70a-4589-9b95-d4394fc48672/deploy-status)](https://app.netlify.com/sites/stelace-instant-workingoo-test/deploys)
 
-> Forked from [Stelace Marketplace template](https://github.com/stelace/jobs-marketplace-template):
+> Forked from [Stelace Marketplace template](https://github.com/stelace/marketplace-demo):
 **Full Vue.js marketplace front-end with pre-configured serverless deployment**.
-
-A lighter platform template focused on search and automation is [also available](https://github.com/stelace/heroes-platform-demo).
 
 ---
 
 **What is Stelace?**
 
-[Stelace API](https://stelace.com/) provides search, inventory and user management infrastructure for Web platforms, ranging from search-intensive marketplaces to online community apps.
+[Stelace API](https://stelace.com/) provides search, inventory and user management infrastructure and APIs for Web platforms, ranging from search-intensive marketplaces to online community apps.
 Stelace offers powerful backend and APIs including advanced search, automation, and content delivery, to let you focus on what makes your platform unique.
 
 [API Docs](https://stelace.com/docs)
@@ -24,6 +22,34 @@ Stelace offers powerful backend and APIs including advanced search, automation, 
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
 ---
+
+## Deployment
+
+We’ve set up continuous deployment with Netlify.
+
+### Branches for continuous deployment
+
+- `dev` for development and _test_ environment, including pending PRs deployed to [Netlify preview subdomains](
+  https://www.netlify.com/docs/continuous-deployment/#branches-deploys)
+- `workingoo` for _live_ environment, automatically deployed after any commit on this branch
+- __`master` is used to pull changes from `upstream/jobs`__, and must be kept in exact sync with no local change.
+
+Usual sequence of commands:
+
+```sh
+git checkout master
+git fetch upstream
+git merge upstream/jobs
+git checkout dev
+# Resolve any conflict
+git merge master
+# Check everything is ok on staging website (Netlify CD)
+git push
+# Deploy live
+git checkout workingoo
+git merge dev
+git push
+```
 
 ## Features :gift:
 
@@ -55,10 +81,15 @@ Leverage these integrations to start running your platform even faster:
 
 ## Stack
 
-- [Vue.js](https://github.com/vuejs/vue) and [Quasar](https://github.com/quasarframework/quasar)
-- [Stelace Backend](https://stelace.com)
+Serverless [JAMStack architecture](https://jamstack.org/):
+
+- [Vue.js](https://github.com/vuejs/vue)
+- [Quasar](https://github.com/quasarframework/quasar) framework
+- [Stelace API](https://stelace.com) as backend
+- [Stelace headless CMS](https://stelace.com/docs/content)
 - [Stelace.js](https://github.com/stelace/stelace.js) SDK
-- Node.js >= 8.9 for tooling
+
+Node.js >= 8.9 is used for tooling.
 
 ## Stelace Dashboard
 
@@ -104,6 +135,8 @@ You need to fill the following environment variables:
 - STELACE_*PUBLISHABLE_API_KEY (pubk_*...) used in Vue app
 - STELACE_*SECRET_API_KEY (seck_*...) used in data seeding scripts
 
+You can get your API Keys in [Stelace Dashboard](https://stelace.com/dashboard).
+
 4. Start the development server
 
 ```sh
@@ -118,32 +151,4 @@ Please refer to [Quasar docs](https://v1.quasar-framework.org/) for more details
 
 ```sh
 yarn seed
-```
-
-## Deployment
-
-We’ve set up continuous deployment with Netlify.
-
-### Branches for continuous deployment
-
-- `dev` for development and _test_ environment, including pending PRs deployed to [Netlify preview subdomains](
-  https://www.netlify.com/docs/continuous-deployment/#branches-deploys)
-- `workingoo` for _live_ environment, automatically deployed after any commit on this branch
-- __`master` is used to pull changes from `upstream/jobs`__, and must be kept in exact sync with no local change.
-
-Usual sequence of commands:
-
-```sh
-git checkout master
-git fetch upstream
-git merge upstream/jobs
-git checkout dev
-# Resolve any conflict
-git merge master
-# Check everything is ok on staging website (Netlify CD)
-git push
-# Deploy live
-git checkout workingoo
-git merge dev
-git push
 ```

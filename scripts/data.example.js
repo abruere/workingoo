@@ -14,6 +14,71 @@ function computeDate (isoDate, duration) {
   return new Date(new Date(isoDate).getTime() + ms(duration)).toISOString()
 }
 
+/*
+  Workingoo
+
+  Workflow contexts:
+  'stelace', 'nexmo', 'vatsense' and 'stripe' workflow contexts must be set in private config.
+
+  Custom Roles:
+  The following 'premium', 'applicant', 'recruiter' and 'newcomer' roles must also be created:
+
+  {
+    "name": "Premium",
+    "value": "premium",
+    "permissions": [
+      "transaction:list:all"
+    ],
+    "readNamespaces": [
+      "premium"
+    ],
+    "metadata": {
+      "instant": {
+        "i18n": {
+          "label": {
+            "entry": "instant",
+            "field": "config.roles.premium_label"
+          }
+        },
+        "isEditableFor": [
+          "getters.mainOrganization"
+        ]
+      }
+    }
+  }
+
+  {
+    "name": "Recruiter",
+    "value": "recruiter",
+    "permissions": [
+      "transaction:list:all",
+      "organization:create",
+      "user:configOrganization"
+    ]
+  }
+
+  {
+    "name": "Applicant",
+    "value": "applicant",
+    "permissions": [
+      "asset:create",
+      "asset:edit",
+      "asset:remove",
+      "availability:create",
+      "availability:edit",
+      "availability:remove"
+    ]
+  }
+
+  {
+    "name": "Newcomer",
+    "value": "newcomer",
+    "readNamespaces": [
+      "premium"
+    ]
+  }
+ */
+
 module.exports = {
   assetTypes: {
     job: {
