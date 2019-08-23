@@ -2,6 +2,7 @@
 import { mapState, mapGetters } from 'vuex'
 import { get } from 'lodash'
 
+import SubscriptionDialog from 'src/components/SubscriptionDialog'
 import TransactionActions from 'src/components/TransactionActions'
 import TransactionStatus from 'src/components/TransactionStatus'
 
@@ -9,6 +10,7 @@ import PageComponentMixin from 'src/mixins/pageComponent'
 
 export default {
   components: {
+    SubscriptionDialog,
     TransactionActions,
     TransactionStatus,
   },
@@ -17,6 +19,8 @@ export default {
   ],
   data () {
     return {
+      subscriptionDialogOpened: false,
+
       filter: '',
       selectFilter: 'active', // 'archive', 'show' or 'hide'
       selected: [],
@@ -161,23 +165,15 @@ export default {
       if (conversation.canAccess) {
         this.$router.push({ name: 'conversation', params: { id: conversation.id } })
       } else {
-        this.openSubscriptionCtaDialog()
+        this.subscriptionDialogOpened = true
       }
     },
     viewProfile (userId) {
       this.$router.push({ name: 'publicProfile', params: { id: userId } })
     },
-    openSubscriptionCtaDialog () {
-      this.$q.dialog({
-        message: this.$t(
-          { id: 'user.account.premium_forbidden_access' },
-        ),
-        ok: {
-          label: this.$t({ id: 'prompt.continue_button' }),
-          color: 'positive',
-          class: 'q-ma-sm'
-        }
-      })
+    redirectToPlans () {
+      this.subscriptionModalOpened = false
+      this.$router.push({ name: 'home', hash: '#pricing' })
     }
   }
 }
@@ -439,6 +435,12 @@ export default {
         </QTable>
       </div>
     </div>
+
+    <SubscriptionDialog
+      :opened="subscriptionDialogOpened"
+      @confirm="redirectToPlans"
+      @cancel="subscriptionDialogOpened = false"
+    />
 
     <AppFooter />
   </QPage>

@@ -471,7 +471,12 @@ export default {
       :opened="subscriptionModalOpened"
       @confirm="redirectToPlans"
       @cancel="subscriptionModalOpened = false"
-    />
+    >
+      <template v-slot:header>
+        <AppContent entry="user" field="account.reverse_search_prerequisite_header" />
+      </template>
+      <AppContent entry="user" field="account.reverse_search_prerequisite_message" />
+    </SubscriptionDialog>
 
     <QSpace />
 

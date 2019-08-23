@@ -31,16 +31,13 @@ export default {
     transition-hide="slide-bottom"
   >
     <QCard>
-      <AppContent
-        tag="QCardSection"
-        class="text-h6 q-mx-md"
-        entry="user"
-        field="account.reverse_search_prerequisite_header"
-      />
+      <QCardSection v-if="$slots.header" class="text-h6 q-mx-md">
+        <slot name="header" />
+      </QCardSection>
 
       <QCardSection class="q-ma-md">
         <slot>
-          <AppContent entry="user" field="account.reverse_search_prerequisite_message" />
+          <AppContent entry="user" field="account.premium_forbidden_access" />
         </slot>
       </QCardSection>
 
