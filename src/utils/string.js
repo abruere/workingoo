@@ -1,5 +1,14 @@
 import { deburr } from 'lodash'
 
+const regexOperatorsRegex = /[|\\{}()[\]^$+*?.-]/g
+
+export function escapeRegexp (str) {
+  if (typeof str !== 'string') {
+    throw new TypeError('Expected a string')
+  }
+  return str.replace(regexOperatorsRegex, '\\$&')
+}
+
 // Options object format expected by url-safe-string
 export function makeSafeForUrl (string, options) {
   /*
@@ -14,7 +23,7 @@ export function makeSafeForUrl (string, options) {
 function safePath (str) {
   const opts = {
     maxLength: 100,
-    regexRemovePattern: /((?!([a-z0-9])).)/gi, // matches opposite of [a-z0-9]
+    regexRemovePattern: /((?!([a-z0-9-])).)/gi, // matches opposite of [a-z0-9-]
     joinString: '-'
   }
 

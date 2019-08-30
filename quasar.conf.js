@@ -27,7 +27,13 @@ module.exports = function (ctx) {
   })
 
   // Ensuring we have local translations up-to-date. Runs once.
-  execSync(ctx.dev ? 'npm run translate' : 'npm run translate:prod', { stdio: 'inherit' })
+  execSync(`npm run translate${ctx.dev ? '' : ':prod'}`, { stdio: 'inherit' })
+
+  // Upload latest translations in default locale to enable Stelace Dashboard editing
+  // This must be done manually in production
+  if (ctx.dev && process.env.STELACE_SECRET_API_KEY) {
+    execSync(`npm run deploy:translations${ctx.dev ? '' : ':prod'}`, { stdio: 'inherit' })
+  }
 
   // ///////// //
   // Dev tools //
@@ -451,6 +457,8 @@ module.exports = function (ctx) {
         STELACE_API_URL: JSON.stringify(apiBaseUrl),
         STELACE_PUBLISHABLE_API_KEY: JSON.stringify(process.env.STELACE_PUBLISHABLE_API_KEY),
         STELACE_INSTANT_WEBSITE_URL: JSON.stringify(websiteUrl),
+        STELACE_PUBLIC_PLATFORM_ID: JSON.stringify(process.env.STELACE_PUBLIC_PLATFORM_ID),
+        VUE_APP_SSO_PROVIDERS: JSON.stringify(process.env.VUE_APP_SSO_PROVIDERS),
         VUE_APP_STELACE_SIGNAL_URL: JSON.stringify(process.env.VUE_APP_STELACE_SIGNAL_URL),
         VUE_APP_SERVICE_NAME: JSON.stringify(process.env.VUE_APP_SERVICE_NAME),
         VUE_APP_MAPBOX_STYLE: JSON.stringify(process.env.VUE_APP_MAPBOX_STYLE),
@@ -485,13 +493,6 @@ module.exports = function (ctx) {
       // https: true,
       // port: 8080,
       open: false, // opens browser window automatically
-
-      proxy: {
-        '/stelace': {
-          target: process.env.STELACE_DASHBOARD_URL,
-          changeOrigin: false,
-        }
-      }
     },
 
     // animations: 'all' --- includes all animations
